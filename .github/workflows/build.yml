@@ -45,8 +45,8 @@ jobs:
         # On failure, surface the compiler/Gradle errors as one annotation (readable without opening the log).
         run: |
           set -o pipefail
-          if ! gradle :app:assembleRelease --no-daemon 2>&1 | tee build.log; then
-            errors=$(grep -E '^e: |^\* What went wrong|^> |error:|Could not|Failed' build.log | head -60)
+          if ! gradle :app:assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log; then
+            errors=$(grep -E '^e: |^\* What went wrong|^> |error:|Could not|Failed|Caused by' build.log | head -60)
             echo "::error title=Build failed::$(echo "$errors" | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
             exit 1
           fi

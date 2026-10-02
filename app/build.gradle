@@ -23,9 +23,9 @@ android {
     def signingPassword = System.getenv('SIGNING_PASSWORD')
     def haveReleaseKey = releaseKey.exists() && signingPassword
 
-    signingConfigs {
-        release {
-            if (haveReleaseKey) {
+    if (haveReleaseKey) {
+        signingConfigs {
+            release {
                 storeFile releaseKey
                 storeType 'pkcs12'
                 storePassword signingPassword
