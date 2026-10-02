@@ -46,7 +46,7 @@ jobs:
         run: |
           set -o pipefail
           if ! gradle :app:assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log; then
-            errors=$(grep -E '^e: |^\* What went wrong|^> |error:|Could not|Failed|Caused by' build.log | head -60)
+            errors=$( { grep -E '^e: |^\* (What went wrong|Where)|^> |^Build file|line: [0-9]|error:|Could not|Caused by' build.log; grep -A30 'Caused by' build.log | grep -E '^\s+at ' ; } | head -80)
             echo "::error title=Build failed::$(echo "$errors" | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
             exit 1
           fi
