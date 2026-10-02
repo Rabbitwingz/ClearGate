@@ -54,19 +54,19 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: GateAdSkipper-apk
+          name: ClearGate-apk
           path: app/build/outputs/apk/release/*.apk
 
       # Replace the "latest" release so this link always serves the newest build:
-      # https://github.com/<owner>/<repo>/releases/latest/download/GateAdSkipper.apk
+      # https://github.com/<owner>/<repo>/releases/latest/download/ClearGate.apk
       - name: Publish latest release
         if: github.ref == 'refs/heads/main' && steps.key.outputs.signed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/release/app-release.apk GateAdSkipper.apk
+          cp app/build/outputs/apk/release/app-release.apk ClearGate.apk
           gh release delete latest --cleanup-tag --yes || true
-          gh release create latest GateAdSkipper.apk \
+          gh release create latest ClearGate.apk \
             --target "$GITHUB_SHA" \
-            --title "Gate Ad Skipper v1.${GITHUB_RUN_NUMBER}" \
+            --title "ClearGate v1.${GITHUB_RUN_NUMBER}" \
             --notes "Built from ${GITHUB_SHA::7}: $(git log -1 --format=%s)"

@@ -50,7 +50,7 @@ data class SetupStatus(
 /** Android 13+ blocks accessibility for sideloaded apps until "Allow restricted settings" is used. */
 val restrictedSettingsApply: Boolean get() = Build.VERSION.SDK_INT >= 33
 
-const val REPO_URL = "https://github.com/Rabbitwingz/MyGateAdBlock"
+const val REPO_URL = "https://github.com/Rabbitwingz/ClearGate"
 
 object SystemScreens {
     fun accessibility(context: Context) = start(context, Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))

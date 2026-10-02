@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ClearGate: a gate arch with "move on" chevrons. Kept inside the 66dp adaptive-icon safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFF" android:pathData="M54,26 L78,35 V52 C78,67 67.5,78.5 54,83 C40.5,78.5 30,67 30,52 V35 Z" />
-    <path android:fillColor="#2F6A3F" android:pathData="M42,43 L52.5,54 L42,65 Z M52,43 L62.5,54 L52,65 Z M63.5,43 H67.5 V65 H63.5 Z" />
+    <path android:pathData="M35,77 L35,52 A19,19 0 0 1 73,52 L73,77" android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF" android:strokeWidth="7" android:strokeLineCap="round" />
+    <path android:pathData="M45,54 L53,62 L45,70 M55,54 L63,62 L55,70" android:fillColor="#00000000"
+        android:strokeColor="#B1F1BB" android:strokeWidth="6.5"
+        android:strokeLineCap="round" android:strokeLineJoin="round" />
 </vector>

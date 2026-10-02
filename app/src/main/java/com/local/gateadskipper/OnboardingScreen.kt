@@ -80,7 +80,7 @@ fun OnboardingScreen(status: SetupStatus, onFinish: () -> Unit) {
                         shape = MaterialShapes.Cookie9Sided,
                         title = "Answer the gate.\nSkip the ad.",
                         body = "Every time you approve or deny a visitor, MyGate shows a full-screen ad. " +
-                            "Gate Ad Skipper gets it out of your way automatically.",
+                            "ClearGate gets it out of your way automatically.",
                     )
                     1 -> HowItWorksPage()
                     2 -> PrivacyPage()
@@ -181,7 +181,7 @@ private fun HowItWorksPage() {
         Step(2, Icons.Rounded.TouchApp, MaterialShapes.Clover4Leaf, "You tap Approve or Deny",
             "Your answer goes to the gate as usual. Nothing about that changes.")
         Step(3, Icons.Rounded.Home, MaterialShapes.Sunny, "The ad is skipped",
-            "As soon as MyGate confirms your answer, Gate Ad Skipper presses Home for you. " +
+            "As soon as MyGate confirms your answer, ClearGate presses Home for you. " +
                 "No ad, no MyGate home screen left open.")
     }
 }
@@ -232,7 +232,7 @@ private fun PrivacyPage() {
         icon = Icons.Rounded.PrivacyTip,
         shape = MaterialShapes.Clover8Leaf,
         title = "Private by design",
-        body = "Gate Ad Skipper uses Android's accessibility feature to see when MyGate shows the ad and to " +
+        body = "ClearGate uses Android's accessibility feature to see when MyGate shows the ad and to " +
             "press Home. That's all it does with it.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -291,8 +291,8 @@ fun SetupSteps(status: SetupStatus) {
         SetupStep(
             done = status.serviceOn,
             icon = Icons.Rounded.Accessibility,
-            title = "Turn on Gate Ad Skipper",
-            body = "Accessibility › Gate Ad Skipper › On",
+            title = "Turn on ClearGate",
+            body = "Accessibility › ClearGate › On",
             actionLabel = "Open",
             onAction = { SystemScreens.accessibility(context) },
         )

@@ -78,7 +78,7 @@ private val DarkBrand = darkColorScheme(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun GateTheme(content: @Composable () -> Unit) {
+fun ClearGateTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val context = LocalContext.current
     val colors = when {

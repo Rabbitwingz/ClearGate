@@ -110,7 +110,7 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text("Gate Ad Skipper") },
+                title = { Text("ClearGate") },
                 subtitle = { Text(headline) },
                 actions = {
                     IconButton(onClick = { menuOpen = true }) {
@@ -253,7 +253,7 @@ private fun StatusHero(status: SetupStatus, enabled: Boolean, onToggle: (Boolean
             Spacer(Modifier.height(6.dp))
             Text(
                 when {
-                    !status.serviceOn -> "Turn on Gate Ad Skipper in Accessibility settings so it can skip the ad."
+                    !status.serviceOn -> "Turn on ClearGate in Accessibility settings so it can skip the ad."
                     enabled -> "After you approve or deny a visitor, the ad is skipped and MyGate goes away."
                     else -> "MyGate's ads will show as usual until you turn this back on."
                 },
