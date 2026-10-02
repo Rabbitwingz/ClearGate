@@ -3,3 +3,8 @@ build/
 local.properties
 *.iml
 .idea/
+
+# signing key: keep out of the public repo
+*.p12
+*.jks
+*.keystore

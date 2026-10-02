@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,3 +30,17 @@ jobs:
         with:
           name: GateAdSkipper-apk
           path: app/build/outputs/apk/release/*.apk
+
+      # Replace the "latest" release so this link always serves the newest build:
+      # https://github.com/<owner>/<repo>/releases/latest/download/GateAdSkipper.apk
+      - name: Publish latest release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk GateAdSkipper.apk
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest GateAdSkipper.apk \
+            --target "$GITHUB_SHA" \
+            --title "Gate Ad Skipper (latest build)" \
+            --notes "Built from ${GITHUB_SHA::7}: $(git log -1 --format=%s)"

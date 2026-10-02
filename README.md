@@ -13,9 +13,10 @@ To close the ad it taps a Close/Skip/× button if it finds one. Otherwise it pre
 
 Nothing leaves the phone: no internet permission, no data collection.
 
-## Build (GitHub Actions)
-1. Create an empty **private** repo on GitHub and push this folder to it.
-2. Open the repo's **Actions** tab → "Build APK" run → download the **GateAdSkipper-apk** artifact (a zip containing `app-release.apk`).
+## Download
+Every push to `main` is built by GitHub Actions and published as a direct APK link (no sign-in needed):
+
+https://github.com/Rabbitwingz/MyGateAdBlock/releases/latest/download/GateAdSkipper.apk
 
 ## Install
 1. Copy the APK to the phone and open it. Allow "install unknown apps" for your file manager or browser when asked.
