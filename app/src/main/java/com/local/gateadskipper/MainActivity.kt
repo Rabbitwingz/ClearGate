@@ -52,12 +52,12 @@ private fun GateApp() {
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
+    // Theme values must be read here; transitionSpec isn't a composable context.
+    val enterSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val exitSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
     AnimatedContent(
         targetState = onboarded,
-        transitionSpec = {
-            fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) togetherWith
-                fadeOut(MaterialTheme.motionScheme.fastEffectsSpec())
-        },
+        transitionSpec = { fadeIn(enterSpec) togetherWith fadeOut(exitSpec) },
         label = "onboarding",
     ) { done ->
         if (!done) {

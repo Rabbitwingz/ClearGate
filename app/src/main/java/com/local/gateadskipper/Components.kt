@@ -49,15 +49,14 @@ fun ShapeBadge(
     spin: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val shape = remember(polygon) { polygon.toShape() }
-    val rotation = if (spin) {
-        rememberInfiniteTransition(label = "spin").animateFloat(
-            initialValue = 0f,
-            targetValue = 360f,
-            animationSpec = infiniteRepeatable(tween(durationMillis = 30_000, easing = LinearEasing)),
-            label = "rotation",
-        ).value
-    } else 0f
+    val shape = polygon.toShape()
+    val turning = rememberInfiniteTransition(label = "spin").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 30_000, easing = LinearEasing)),
+        label = "rotation",
+    )
+    val rotation = if (spin) turning.value else 0f
     Box(modifier.size(size), contentAlignment = Alignment.Center) {
         Box(
             Modifier
