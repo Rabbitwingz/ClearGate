@@ -29,7 +29,7 @@ android {
                 storeFile releaseKey
                 storeType 'pkcs12'
                 storePassword signingPassword
-                keyAlias 'gateadskipper'
+                keyAlias 'cleargate'
                 keyPassword signingPassword
             }
         }
