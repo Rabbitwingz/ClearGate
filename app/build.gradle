@@ -13,8 +13,8 @@ android {
         minSdk 26
         targetSdk 36
         // CI run number, so each published build is a newer version than the last.
-        versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
-        versionName "1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+        versionCode = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+        versionName = "1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
     }
 
     // CI writes the key from the KEYSTORE_B64 secret to app/release.p12 (gitignored) and passes SIGNING_PASSWORD,
