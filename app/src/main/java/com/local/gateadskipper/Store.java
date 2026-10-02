@@ -17,11 +17,14 @@ final class Store {
     private static final String KEY_BLOCKED = "blocked_classes";
     private static final String KEY_LOG = "screen_log";
     private static final String KEY_SKIPPED = "skipped_count";
+    private static final String KEY_LAST_SKIPPED = "last_skipped_at";
+    private static final String KEY_ONBOARDED = "onboarded";
     private static final int LOG_SIZE = 40;
 
     private Store() {}
 
-    private static SharedPreferences prefs(Context c) {
+    /** Package-private so the UI can listen for changes made by the service. */
+    static SharedPreferences prefs(Context c) {
         return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
@@ -48,7 +51,23 @@ final class Store {
     }
 
     static void incrementSkipped(Context c) {
-        prefs(c).edit().putInt(KEY_SKIPPED, skippedCount(c) + 1).apply();
+        prefs(c).edit()
+                .putInt(KEY_SKIPPED, skippedCount(c) + 1)
+                .putLong(KEY_LAST_SKIPPED, System.currentTimeMillis())
+                .apply();
+    }
+
+    /** Wall-clock time of the last skipped ad, or 0 if none yet. */
+    static long lastSkippedAt(Context c) {
+        return prefs(c).getLong(KEY_LAST_SKIPPED, 0);
+    }
+
+    static boolean isOnboarded(Context c) {
+        return prefs(c).getBoolean(KEY_ONBOARDED, false);
+    }
+
+    static void setOnboarded(Context c, boolean done) {
+        prefs(c).edit().putBoolean(KEY_ONBOARDED, done).apply();
     }
 
     /** Newest entry first. Each entry: {t: millis, cls: screen class, sum: visible ids/texts, note: what we did}. */

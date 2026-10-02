@@ -21,20 +21,23 @@ jobs:
       # The runner image ships the Android SDK at $ANDROID_HOME; Gradle fetches any missing platform itself.
       - uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '8.7'
+          gradle-version: '9.8.0'
 
-      # Restore the fixed signing key from repo secrets; refuse to build without it, so the
-      # published APK always installs over the previous one.
+      # Restore the fixed signing key from repo secrets. Without it the build still runs (to check the code),
+      # but nothing is published, because that APK wouldn't install over the previous one.
       - name: Restore signing key
+        id: key
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE_B64" ] || [ -z "$SIGNING_PASSWORD" ]; then
-            echo "::error::Add the KEYSTORE_B64 and SIGNING_PASSWORD repository secrets (Settings > Secrets and variables > Actions)."
-            exit 1
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$SIGNING_PASSWORD" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > app/release.p12
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::KEYSTORE_B64 / SIGNING_PASSWORD secrets missing: building with a throwaway key and not publishing."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "$KEYSTORE_B64" | base64 -d > app/release.p12
 
       - name: Build release APK
         env:
@@ -49,7 +52,7 @@ jobs:
       # Replace the "latest" release so this link always serves the newest build:
       # https://github.com/<owner>/<repo>/releases/latest/download/GateAdSkipper.apk
       - name: Publish latest release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && steps.key.outputs.signed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -57,5 +60,5 @@ jobs:
           gh release delete latest --cleanup-tag --yes || true
           gh release create latest GateAdSkipper.apk \
             --target "$GITHUB_SHA" \
-            --title "Gate Ad Skipper (latest build)" \
+            --title "Gate Ad Skipper v1.${GITHUB_RUN_NUMBER}" \
             --notes "Built from ${GITHUB_SHA::7}: $(git log -1 --format=%s)"

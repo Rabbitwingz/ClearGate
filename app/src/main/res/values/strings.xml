@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name">Gate Ad Skipper</string>
     <string name="service_label">Gate Ad Skipper</string>
-    <string name="service_description">Watches only the MyGate app and closes the full-screen ad that opens after you approve or deny a visitor. It reads MyGate\'s screen to find the ad and its close button. It does not read other apps and sends nothing off the phone.</string>
+    <string name="service_description">Skips the full-screen ad MyGate shows after you approve or deny a visitor. Once MyGate confirms your answer, it presses Home for you. It only sees the MyGate app, has no internet access, and nothing leaves your phone.</string>
 </resources>
