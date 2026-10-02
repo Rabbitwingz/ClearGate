@@ -23,7 +23,22 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      # Restore the fixed signing key from repo secrets; refuse to build without it, so the
+      # published APK always installs over the previous one.
+      - name: Restore signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$SIGNING_PASSWORD" ]; then
+            echo "::error::Add the KEYSTORE_B64 and SIGNING_PASSWORD repository secrets (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > app/release.p12
+
       - name: Build release APK
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: gradle :app:assembleRelease --no-daemon
 
       - uses: actions/upload-artifact@v5
