@@ -61,7 +61,7 @@ Some phones (Xiaomi, Oppo, Vivo, Realme, Samsung and others) aggressively stop b
 <details>
 <summary><b>The ad still shows after a MyGate update</b></summary>
 
-Open ClearGate and look at **Recent activity** (turn on **All screens** for more detail). Tap the screen that opened right after "You answered a visitor" and choose **Always skip this screen**. Or [open an issue](https://github.com/Rabbitwingz/ClearGate/issues) with a screenshot of that list.
+ClearGate recognises the screen by its "Entry approved for …" text, so a MyGate redesign can break it. Check **Recent activity**: if you see "You answered a visitor" but no "Ad skipped" after it, [open an issue](https://github.com/Rabbitwingz/ClearGate/issues) with a screenshot of the screen that stayed open.
 </details>
 
 <details>
@@ -72,8 +72,8 @@ That's expected: after you answer a request, it always presses Home. Just reopen
 
 ## How it works (for developers)
 
-- [`AdSkipService`](app/src/main/java/io/github/rabbitwingz/cleargate/AdSkipService.java) is an `AccessibilityService` limited to `com.mygate.user` ([config](app/src/main/res/xml/accessibility_config.xml)). When the approve/deny screen appears, it starts a 20-second watch. If MyGate's "Entry approved/denied for …" screen (or another screen with ad markers) appears in that window, it performs `GLOBAL_ACTION_HOME`. It falls back to Back only while MyGate is still in front.
-- Known ad-SDK activities (AdMob, Meta Audience Network, AppLovin, …) and screens you mark in the app are always skipped. A screen showing Approve/Deny buttons never is.
+- [`AdSkipService`](app/src/main/java/io/github/rabbitwingz/cleargate/AdSkipService.java) is an `AccessibilityService` limited to `com.mygate.user` ([config](app/src/main/res/xml/accessibility_config.xml)). When the approve/deny screen appears, it starts a 20-second watch. If MyGate's "Entry approved/denied for …" screen appears in that window, it performs `GLOBAL_ACTION_HOME`. It falls back to Back only while MyGate is still in front.
+- It never acts outside that window, and never while Approve/Deny buttons are on screen, so using MyGate normally is unaffected. The activity log only records your answer and what ClearGate did, not screen contents.
 - The UI is Jetpack Compose with **Material 3 Expressive** (`MaterialExpressiveTheme`, expressive motion, Material shapes, dynamic color).
 
 ### Build from source

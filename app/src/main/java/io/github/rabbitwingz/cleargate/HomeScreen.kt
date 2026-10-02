@@ -1,10 +1,8 @@
 package io.github.rabbitwingz.cleargate
 
 import android.text.format.DateUtils
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.GppGood
@@ -27,7 +24,6 @@ import androidx.compose.material.icons.rounded.GppMaybe
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PauseCircle
-import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -36,7 +32,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -52,35 +47,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /** One row of the service's activity log (see Store.addLog). */
-data class LogEntry(val time: Long, val cls: String, val summary: String, val note: String) {
-    enum class Kind { Answered, Skipped, Fallback, Screen }
-
-    val kind: Kind = when {
-        summary.startsWith("tapped: ") -> Kind.Answered
-        note.startsWith("AD:") -> Kind.Skipped
-        note.startsWith("still showing") -> Kind.Fallback
-        else -> Kind.Screen
+data class LogEntry(val time: Long, val kind: Kind, val detail: String) {
+    enum class Kind(val key: String) {
+        Answered(Store.LOG_ANSWERED), Skipped(Store.LOG_SKIPPED), Fallback(Store.LOG_FALLBACK)
     }
 }
 
 fun readLog(context: android.content.Context): List<LogEntry> {
     val array = Store.log(context)
     return (0 until array.length()).mapNotNull { i ->
-        array.optJSONObject(i)?.let {
-            LogEntry(it.optLong("t"), it.optString("cls"), it.optString("sum"), it.optString("note"))
-        }
+        val o = array.optJSONObject(i) ?: return@mapNotNull null
+        val kind = LogEntry.Kind.entries.firstOrNull { it.key == o.optString("kind") } ?: return@mapNotNull null
+        LogEntry(o.optLong("t"), kind, o.optString("detail"))
     }
 }
 
@@ -93,9 +81,7 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
     val skipped = remember(prefsVersion) { Store.skippedCount(context) }
     val lastSkipped = remember(prefsVersion) { Store.lastSkippedAt(context) }
     val log = remember(prefsVersion) { readLog(context) }
-    val blocked = remember(prefsVersion) { Store.blockedClasses(context) }
 
-    var showAllScreens by rememberSaveable { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -138,7 +124,6 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
             )
         },
     ) { padding ->
-        val visible = if (showAllScreens) log else log.filter { it.kind != LogEntry.Kind.Screen }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -164,25 +149,12 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
                 item(key = "noMyGate") { NoMyGateNote() }
             }
 
-            item(key = "activityHeader") {
-                SectionHeader("Recent activity") {
-                    FilterChip(
-                        selected = showAllScreens,
-                        onClick = { showAllScreens = !showAllScreens },
-                        label = { Text("All screens") },
-                    )
-                }
-            }
-            if (visible.isEmpty()) {
+            item(key = "activityHeader") { SectionHeader("Recent activity") }
+            if (log.isEmpty()) {
                 item(key = "empty") { EmptyActivity() }
             } else {
-                items(uniqueKeys(visible), key = { it.first }) { (_, entry) ->
-                    ActivityRow(
-                        entry = entry,
-                        blocked = entry.cls in blocked,
-                        onToggleBlock = { Store.setBlocked(context, entry.cls, entry.cls !in blocked) },
-                        modifier = Modifier.animateItem(),
-                    )
+                items(uniqueKeys(log), key = { it.first }) { (_, entry) ->
+                    ActivityRow(entry = entry, modifier = Modifier.animateItem())
                 }
             }
         }
@@ -299,16 +271,13 @@ private fun StatTile(value: String, label: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun ActivityRow(entry: LogEntry, blocked: Boolean, onToggleBlock: () -> Unit, modifier: Modifier = Modifier) {
+private fun ActivityRow(entry: LogEntry, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    var expanded by rememberSaveable(entry.time, entry.note) { mutableStateOf(false) }
-
     val (icon, title, subtitle) = describe(entry)
     val (badgeBg, badgeFg) = when (entry.kind) {
         LogEntry.Kind.Skipped -> colors.primary to colors.onPrimary
         LogEntry.Kind.Answered -> colors.tertiaryContainer to colors.onTertiaryContainer
         LogEntry.Kind.Fallback -> colors.secondaryContainer to colors.onSecondaryContainer
-        LogEntry.Kind.Screen -> colors.surfaceContainerHighest to colors.onSurfaceVariant
     }
 
     Surface(
@@ -316,53 +285,23 @@ private fun ActivityRow(entry: LogEntry, blocked: Boolean, onToggleBlock: () -> 
         color = colors.surfaceContainerLow,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column(
-            Modifier
-                .clickable { expanded = !expanded }
-                .padding(horizontal = 16.dp, vertical = 14.dp)
-                .animateContentSize(),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(14.dp), color = badgeBg) {
-                    Icon(icon, contentDescription = null, tint = badgeFg, modifier = Modifier.padding(10.dp))
-                }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
-                    Text(
-                        subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.onSurfaceVariant,
-                        maxLines = if (expanded) Int.MAX_VALUE else 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                Text(relativeTime(entry.time), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = RoundedCornerShape(14.dp), color = badgeBg) {
+                Icon(icon, contentDescription = null, tint = badgeFg, modifier = Modifier.padding(10.dp))
             }
-            AnimatedVisibility(expanded) {
-                Column(Modifier.padding(top = 12.dp)) {
-                    if (entry.cls.isNotEmpty()) {
-                        Text("Screen", style = MaterialTheme.typography.labelMedium, color = colors.primary)
-                        Text(entry.cls, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, color = colors.onSurface)
-                    }
-                    if (entry.summary.isNotEmpty() && entry.kind != LogEntry.Kind.Answered) {
-                        Spacer(Modifier.height(8.dp))
-                        Text("What was on screen", style = MaterialTheme.typography.labelMedium, color = colors.primary)
-                        Text(entry.summary, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, color = colors.onSurfaceVariant)
-                    }
-                    val canBlock = entry.kind == LogEntry.Kind.Screen && entry.cls.isNotEmpty() &&
-                        entry.cls !in AdSkipService.KNOWN_AD_ACTIVITIES
-                    if (canBlock) {
-                        Spacer(Modifier.height(4.dp))
-                        TextButton(onClick = onToggleBlock, modifier = Modifier.align(Alignment.End)) {
-                            Icon(Icons.Rounded.Block, null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(if (blocked) "Stop treating as an ad" else "Always skip this screen")
-                        }
-                    }
-                }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
+            Spacer(Modifier.width(8.dp))
+            Text(relativeTime(entry.time), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
         }
     }
 }
@@ -371,19 +310,10 @@ private fun describe(entry: LogEntry): Triple<ImageVector, String, String> = whe
     LogEntry.Kind.Answered -> Triple(
         Icons.Rounded.TouchApp,
         "You answered a visitor",
-        entry.summary.removePrefix("tapped: ").replace(" button", "").replaceFirstChar { it.uppercase() },
+        entry.detail.replaceFirstChar { it.uppercase() },
     )
-    LogEntry.Kind.Skipped -> Triple(
-        Icons.Rounded.VisibilityOff,
-        "Ad skipped",
-        entry.note.removePrefix("AD: ").substringBefore(" →").replaceFirstChar { it.uppercase() },
-    )
+    LogEntry.Kind.Skipped -> Triple(Icons.Rounded.VisibilityOff, "Ad skipped", "Pressed Home once MyGate confirmed")
     LogEntry.Kind.Fallback -> Triple(Icons.Rounded.Replay, "Pressed Back as a fallback", "MyGate was still showing the ad")
-    LogEntry.Kind.Screen -> Triple(
-        Icons.Rounded.PhoneAndroid,
-        "MyGate screen",
-        entry.cls.removePrefix(AdSkipService.TARGET_PACKAGE).substringAfterLast('.').ifEmpty { "Unknown" },
-    )
 }
 
 @Composable
@@ -414,7 +344,7 @@ private fun NoMyGateNote() {
 private fun uniqueKeys(entries: List<LogEntry>): List<Pair<String, LogEntry>> {
     val seen = HashMap<String, Int>()
     return entries.map { e ->
-        val base = "${e.time}|${e.note}|${e.summary.hashCode()}"
+        val base = "${e.time}|${e.kind}|${e.detail}"
         val n = seen.merge(base, 1, Int::plus)!!
         (if (n == 1) base else "$base#$n") to e
     }
