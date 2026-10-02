@@ -1,4 +1,4 @@
-package com.local.gateadskipper;
+package io.github.rabbitwingz.cleargate;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 /** Settings, the user's block list and a short log of MyGate screens, all in SharedPreferences. */
 final class Store {
-    private static final String PREFS = "gate_ad_skipper";
+    private static final String PREFS = "cleargate";
     private static final String KEY_ENABLED = "enabled";
     private static final String KEY_BLOCKED = "blocked_classes";
     private static final String KEY_LOG = "screen_log";

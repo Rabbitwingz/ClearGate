@@ -1,4 +1,4 @@
-package com.local.gateadskipper
+package io.github.rabbitwingz.cleargate
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

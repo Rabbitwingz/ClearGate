@@ -1,4 +1,4 @@
-package com.local.gateadskipper
+package io.github.rabbitwingz.cleargate
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState

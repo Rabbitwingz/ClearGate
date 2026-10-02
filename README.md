@@ -32,7 +32,7 @@ It never touches the approve/deny screen itself, and it waits for MyGate's confi
 
 - **Only sees MyGate.** It uses Android's accessibility feature, restricted to the `com.mygate.user` package. Other apps are invisible to it.
 - **No internet permission.** It can't send anything anywhere. The activity log stays on your phone.
-- **Open source.** Everything it does is in [`AdSkipService.java`](app/src/main/java/com/local/gateadskipper/AdSkipService.java).
+- **Open source.** Everything it does is in [`AdSkipService.java`](app/src/main/java/io/github/rabbitwingz/cleargate/AdSkipService.java).
 - **One switch** pauses it at any time.
 
 ## Install
@@ -72,7 +72,7 @@ That's expected: after you answer a request, it always presses Home. Just reopen
 
 ## How it works (for developers)
 
-- [`AdSkipService`](app/src/main/java/com/local/gateadskipper/AdSkipService.java) is an `AccessibilityService` limited to `com.mygate.user` ([config](app/src/main/res/xml/accessibility_config.xml)). When the approve/deny screen appears, it starts a 20-second watch. If MyGate's "Entry approved/denied for …" screen (or another screen with ad markers) appears in that window, it performs `GLOBAL_ACTION_HOME`. It falls back to Back only while MyGate is still in front.
+- [`AdSkipService`](app/src/main/java/io/github/rabbitwingz/cleargate/AdSkipService.java) is an `AccessibilityService` limited to `com.mygate.user` ([config](app/src/main/res/xml/accessibility_config.xml)). When the approve/deny screen appears, it starts a 20-second watch. If MyGate's "Entry approved/denied for …" screen (or another screen with ad markers) appears in that window, it performs `GLOBAL_ACTION_HOME`. It falls back to Back only while MyGate is still in front.
 - Known ad-SDK activities (AdMob, Meta Audience Network, AppLovin, …) and screens you mark in the app are always skipped. A screen showing Approve/Deny buttons never is.
 - The UI is Jetpack Compose with **Material 3 Expressive** (`MaterialExpressiveTheme`, expressive motion, Material shapes, dynamic color).
 

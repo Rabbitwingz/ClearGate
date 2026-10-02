@@ -1,4 +1,4 @@
-package com.local.gateadskipper
+package io.github.rabbitwingz.cleargate
 
 import android.content.SharedPreferences
 import android.os.Bundle

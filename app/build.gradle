@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace 'com.local.gateadskipper'
+    namespace 'io.github.rabbitwingz.cleargate'
     // Material 3 Expressive (material3 1.5 alphas) needs compileSdk 37 and AGP 9.1+.
     compileSdk 37
 
     defaultConfig {
-        applicationId 'com.local.gateadskipper'
+        applicationId 'io.github.rabbitwingz.cleargate'
         minSdk 26
         targetSdk 36
         // CI run number, so each published build is a newer version than the last.
