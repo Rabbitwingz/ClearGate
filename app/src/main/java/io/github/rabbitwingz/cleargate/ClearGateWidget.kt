@@ -58,7 +58,7 @@ class ClearGateWidget : AppWidgetProvider() {
                 views.setTextViewText(
                     R.id.widget_status,
                     when {
-                        state.on -> "On · skipping MyGate ads"
+                        state.on -> "Skipping MyGate ads"
                         state.paused -> "Paused for banking"
                         else -> "Off"
                     },

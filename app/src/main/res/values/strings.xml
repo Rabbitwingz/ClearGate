@@ -5,7 +5,7 @@
     <string name="service_label">@string/app_name</string>
     <string name="tile_label">Pause ClearGate</string>
     <string name="widget_add_bank">Add bank</string>
-    <string name="widget_status_on">On · skipping MyGate ads</string>
+    <string name="widget_status_on">Skipping MyGate ads</string>
     <string name="widget_pause">Pause</string>
     <string name="widget_preview_bank">Your bank</string>
     <string name="widget_description">Open your banking apps with ClearGate paused, and pause or resume it, from your home screen.</string>
