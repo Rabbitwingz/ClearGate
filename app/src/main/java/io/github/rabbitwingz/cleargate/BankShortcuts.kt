@@ -6,6 +6,12 @@ import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.RectF
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
@@ -88,10 +94,58 @@ object BankShortcuts {
 
     private fun shortcutId(packageName: String) = "bank:$packageName"
 
+    /**
+     * Renders an app icon into ClearGate's one icon shape (a rounded square, like ClearGate's own logo), so banks look
+     * consistent whatever shape their app ships:
+     * - adaptive icons: background and foreground layers drawn full-bleed, then masked;
+     * - legacy icons that fill the square (e.g. a plain square logo): masked as they are;
+     * - legacy icons with their own shape or transparent edges (a circle, a free-floating logo): shrunk onto a white
+     *   tile, as launchers do.
+     */
     private fun toBitmap(drawable: Drawable): Bitmap {
-        val bitmap = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
-        drawable.setBounds(0, 0, ICON_PX, ICON_PX)
-        drawable.draw(Canvas(bitmap))
-        return bitmap
+        val size = ICON_PX
+        val content = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(content)
+        if (drawable is AdaptiveIconDrawable) {
+            // Adaptive layers are 108dp with the visible area in the middle 72dp: overdraw by a quarter on each side.
+            val bleed = size / 4
+            for (layer in listOfNotNull(drawable.background, drawable.foreground)) {
+                layer.setBounds(-bleed, -bleed, size + bleed, size + bleed)
+                layer.draw(canvas)
+            }
+        } else {
+            drawable.setBounds(0, 0, size, size)
+            drawable.draw(canvas)
+            if (!fillsSquare(content)) {
+                content.eraseColor(Color.WHITE)
+                val inset = (size * 0.14f).toInt()
+                drawable.setBounds(inset, inset, size - inset, size - inset)
+                drawable.draw(canvas)
+            }
+        }
+        return mask(content)
     }
+
+    /** True if the legacy icon is opaque near all four corners, i.e. it's a full square rather than its own shape. */
+    private fun fillsSquare(bitmap: Bitmap): Boolean {
+        val edge = bitmap.width / 12
+        val far = bitmap.width - 1 - edge
+        return listOf(edge to edge, far to edge, edge to far, far to far)
+            .all { (x, y) -> Color.alpha(bitmap.getPixel(x, y)) > 200 }
+    }
+
+    /** Clips to a rounded square with anti-aliased edges. */
+    private fun mask(content: Bitmap): Bitmap {
+        val size = content.width.toFloat()
+        val out = Bitmap.createBitmap(content.width, content.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(out)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        canvas.drawRoundRect(RectF(0f, 0f, size, size), size * CORNER, size * CORNER, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(content, 0f, 0f, paint)
+        return out
+    }
+
+    /** Corner radius as a fraction of the icon size: matches the rounded squares on most launchers and ClearGate's logo. */
+    private const val CORNER = 0.28f
 }

@@ -33,6 +33,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         Store.resetStaleTileFlagOnce(this)
+        // Re-render bank icons (shortcuts and widget) with the current app version's icon style.
+        BankShortcuts.publish(this)
         handle(intent)
         setContent { ClearGateTheme { GateApp(openBankingRequests.intValue) } }
     }
