@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClearGate · Answer the gate. Skip the ad.</title>
+  <meta name="description" content="ClearGate is a tiny, private Android app that skips MyGate's full-screen ad after you approve or deny a visitor. Free and open source." />
+  <meta name="theme-color" content="#E8590C" />
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <meta property="og:title" content="ClearGate · Answer the gate. Skip the ad." />
+  <meta property="og:description" content="A tiny, private Android app that skips MyGate's full-screen ad after you answer a visitor." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #E8590C;
+      --orange-deep: #C2410C;
+      --peach: #FFE0C2;
+      --peach-soft: #FFF3E8;
+      --ink: #1C1410;
+      --ink-soft: #5B4C43;
+      --line: #EFE3D8;
+      --bg: #FFFAF5;
+      --card: #FFFFFF;
+      --radius: 28px;
+      --max: 1120px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #FBEFE4;
+        --ink-soft: #C9B6A8;
+        --line: #33261F;
+        --bg: #140E0B;
+        --card: #1E1612;
+        --peach-soft: #2A1A10;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+
+    /* Nav */
+    nav { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(1.4) blur(12px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; text-decoration: none; }
+    .brand .logo { width: 34px; height: 34px; }
+    .nav-links { display: flex; gap: 24px; align-items: center; font-size: 15px; font-weight: 500; }
+    .nav-links a { text-decoration: none; color: var(--ink-soft); }
+    .nav-links a:hover { color: var(--ink); }
+    @media (max-width: 720px) { .nav-links .hide-sm { display: none; } }
+
+    .btn { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 14px 24px;
+      font-weight: 700; font-size: 16px; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--orange); color: #fff; box-shadow: 0 8px 24px -8px rgba(232, 89, 12, .6); }
+    .btn-ghost { border: 1.5px solid var(--line); color: var(--ink); }
+    .btn-sm { padding: 9px 16px; font-size: 14px; }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; position: relative; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 720px; height: 720px;
+      background: radial-gradient(circle, color-mix(in srgb, var(--orange) 22%, transparent), transparent 65%); z-index: -1; }
+    .hero .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    @media (max-width: 880px) { .hero .wrap { grid-template-columns: 1fr; text-align: center; } .hero-cta { justify-content: center; } }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; letter-spacing: .02em;
+      color: var(--orange-deep); background: var(--peach-soft); border: 1px solid color-mix(in srgb, var(--orange) 25%, transparent);
+      padding: 6px 12px; border-radius: 999px; }
+    @media (prefers-color-scheme: dark) { .eyebrow { color: var(--peach); } }
+    h1 { font-size: clamp(40px, 6.5vw, 72px); line-height: 1.02; letter-spacing: -0.035em; margin: 18px 0 18px; font-weight: 800; }
+    h1 .accent { color: var(--orange); }
+    .lede { font-size: clamp(17px, 2vw, 20px); color: var(--ink-soft); max-width: 34em; margin: 0 0 30px; }
+    @media (max-width: 880px) { .lede { margin-left: auto; margin-right: auto; } }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .fine { font-size: 13px; color: var(--ink-soft); margin-top: 14px; }
+
+    /* Phone demo */
+    .phone { width: 280px; height: 560px; margin: 0 auto; border-radius: 44px; background: #0E0B09; padding: 12px;
+      box-shadow: 0 40px 80px -30px rgba(60, 25, 5, .55), inset 0 0 0 2px #2B211B; position: relative; }
+    .screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden;
+      background: linear-gradient(170deg, #3B4A33, #1D2A2C 60%, #15201F); }
+    .notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 84px; height: 22px; background: #0E0B09; border-radius: 12px; z-index: 5; }
+    .scene { position: absolute; inset: 0; padding: 54px 18px 18px; display: flex; flex-direction: column; animation-duration: 9s;
+      animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    .scene-request { animation-name: s1; }
+    .scene-ad { animation-name: s2; }
+    .scene-home { animation-name: s3; background: linear-gradient(170deg, #F6C9A3, #E8590C 140%); }
+    @keyframes s1 { 0%, 34% { opacity: 1; transform: none; } 38%, 100% { opacity: 0; transform: scale(.98); } }
+    @keyframes s2 { 0%, 34% { opacity: 0; } 38%, 58% { opacity: 1; transform: none; } 66%, 100% { opacity: 0; transform: translateY(40%) scale(.9); } }
+    @keyframes s3 { 0%, 60% { opacity: 0; } 66%, 96% { opacity: 1; } 100% { opacity: 0; } }
+    .s-title { color: #fff; text-align: center; font-weight: 700; font-size: 20px; margin-top: 30px; }
+    .s-sub { color: #C8D3CF; text-align: center; font-size: 12px; }
+    .s-card { margin: 18px 0; height: 150px; border-radius: 18px; background: #34433F; display: grid; place-items: center; color: #9FB0AB; font-size: 13px; }
+    .s-btns { display: flex; justify-content: space-around; margin-top: auto; margin-bottom: 22px; }
+    .s-btn { text-align: center; color: #fff; font-size: 11px; }
+    .s-dot { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 6px; font-size: 22px; }
+    .deny { background: #FBDCDC; color: #B42318; }
+    .approve { background: #2E9B48; color: #fff; position: relative; }
+    .approve::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid #fff;
+      animation: tap 9s infinite; opacity: 0; }
+    @keyframes tap { 0%, 24% { opacity: 0; transform: scale(1.3); } 28% { opacity: .9; transform: scale(1); } 34%, 100% { opacity: 0; transform: scale(.9); } }
+    .ok { background: #fff; color: #1F7A3A; border-radius: 14px; padding: 12px; font-weight: 700; font-size: 13px; }
+    .ad { flex: 1; margin-top: 12px; border-radius: 16px; background: repeating-linear-gradient(45deg, #EDE8E4, #EDE8E4 12px, #E2DBD5 12px, #E2DBD5 24px);
+      position: relative; display: grid; place-items: center; color: #8B7F77; font-weight: 800; letter-spacing: .1em; font-size: 22px; }
+    .ad small { position: absolute; right: 10px; bottom: 8px; font-size: 10px; letter-spacing: 0; border: 1px solid #8B7F77; padding: 0 4px; border-radius: 3px; }
+    .home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: auto; margin-bottom: 18px; }
+    .home-grid span { aspect-ratio: 1; border-radius: 14px; background: rgba(255, 255, 255, .55); }
+    .toast { align-self: center; margin-top: 140px; background: rgba(20, 14, 11, .85); color: #fff; font-size: 12px; padding: 8px 14px; border-radius: 999px; }
+    .demo-caption { text-align: center; font-size: 13px; color: var(--ink-soft); margin-top: 16px; }
+    @media (prefers-reduced-motion: reduce) {
+      .scene { animation: none; }
+      .scene-request, .scene-ad { opacity: 0; }
+      .scene-home { opacity: 1; }
+    }
+
+    /* Sections */
+    section { padding: 72px 0; }
+    .section-head { max-width: 640px; margin: 0 auto 44px; text-align: center; }
+    h2 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 12px; font-weight: 800; }
+    .section-head p { color: var(--ink-soft); font-size: 18px; margin: 0; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+    @media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+    .step { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+    .step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 40px; height: 40px;
+      border-radius: 14px; background: var(--peach-soft); color: var(--orange); font-weight: 800; margin-bottom: 16px; }
+    .step h3 { margin: 0 0 6px; font-size: 20px; }
+    .step p { margin: 0; color: var(--ink-soft); }
+
+    .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 820px) { .features { grid-template-columns: 1fr; } }
+    .feature { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: flex; gap: 18px; }
+    .icon { flex: none; width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: var(--orange); color: #fff; }
+    .icon svg { width: 24px; height: 24px; }
+    .feature h3 { margin: 0 0 6px; font-size: 19px; }
+    .feature p { margin: 0; color: var(--ink-soft); }
+
+    .privacy { background: var(--ink); color: var(--bg); border-radius: 36px; padding: 56px 40px; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    @media (prefers-color-scheme: dark) { .privacy { background: #2A1A10; color: var(--ink); } }
+    @media (max-width: 820px) { .privacy { grid-template-columns: 1fr; padding: 40px 24px; } }
+    .privacy h2 { color: inherit; }
+    .privacy p { opacity: .8; font-size: 17px; }
+    .checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .checks li { display: flex; gap: 12px; align-items: flex-start; font-size: 16px; }
+    .checks li::before { content: "✓"; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--orange); color: #fff;
+      display: grid; place-items: center; font-size: 14px; font-weight: 800; margin-top: 1px; }
+
+    .install { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 820px) { .install { grid-template-columns: 1fr; } }
+    .install ol { margin: 0; padding-left: 22px; display: grid; gap: 14px; font-size: 17px; }
+    .install ol li::marker { color: var(--orange); font-weight: 800; }
+    .install ol span { color: var(--ink-soft); display: block; font-size: 15px; }
+
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px 22px; margin-bottom: 12px; }
+    summary { cursor: pointer; font-weight: 700; font-size: 16px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--orange); font-size: 22px; line-height: 1; transition: transform .2s; }
+    details[open] summary::after { transform: rotate(45deg); }
+    details p { margin: 12px 0 0; color: var(--ink-soft); }
+
+    .cta-band { text-align: center; padding: 72px 20px; }
+    .cta-band .logo { width: 88px; height: 88px; margin-bottom: 18px; }
+
+    footer { border-top: 1px solid var(--line); padding: 32px 0 48px; font-size: 14px; color: var(--ink-soft); }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+    footer .disclaimer { max-width: 640px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <a class="brand" href="#top"><svg class="logo" width="34" height="34" viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="30" fill="#E8590C"/><path d="M30,84 V52 A24,24 0 0 1 78,52 V84" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/><path d="M43,55 L53,65 L43,75 M56,55 L66,65 L56,75" fill="none" stroke="#FFE0C2" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ClearGate</a>
+      <div class="nav-links">
+        <a class="hide-sm" href="#how">How it works</a>
+        <a class="hide-sm" href="#privacy">Privacy</a>
+        <a class="hide-sm" href="#faq">FAQ</a>
+        <a class="btn btn-primary btn-sm" href="https://github.com/Rabbitwingz/ClearGate/releases/latest/download/ClearGate.apk">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <header class="hero">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow">Free · Open source · Android</span>
+          <h1>Answer the gate.<br /><span class="accent">Skip the ad.</span></h1>
+          <p class="lede">Every time you approve or deny a visitor in MyGate, a full-screen ad follows. ClearGate quietly gets it out of your way, so you're back to what you were doing.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="https://github.com/Rabbitwingz/ClearGate/releases/latest/download/ClearGate.apk">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>
+              Download for Android
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/Rabbitwingz/ClearGate">View on GitHub</a>
+          </div>
+          <p class="fine">Android 8 or later · No account · No internet access</p>
+        </div>
+
+        <div>
+          <div class="phone" role="img" aria-label="Animation: a MyGate visitor request, you tap Approve, the ad that follows is skipped and you're back on your home screen.">
+            <div class="screen">
+              <div class="notch"></div>
+              <div class="scene scene-request">
+                <div class="s-title">Guest</div>
+                <div class="s-sub">is waiting at the Main Gate</div>
+                <div class="s-card">Visitor photo</div>
+                <div class="s-btns">
+                  <div class="s-btn"><div class="s-dot deny">⊘</div>Deny</div>
+                  <div class="s-btn"><div class="s-dot approve">✓</div>Approve</div>
+                </div>
+              </div>
+              <div class="scene scene-ad">
+                <div class="ok">✓ Entry approved</div>
+                <div class="ad">AD<small>AD</small></div>
+              </div>
+              <div class="scene scene-home">
+                <div class="toast">Ad skipped by ClearGate</div>
+                <div class="home-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="demo-caption">Approve · ad appears · ClearGate skips it</p>
+        </div>
+      </div>
+    </header>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>How it works</h2>
+          <p>Nothing about answering the gate changes. ClearGate just handles what comes after.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><h3>A visitor arrives</h3><p>MyGate shows the entry request or delivery pre-approval, just like always.</p></div>
+          <div class="step"><h3>You approve or deny</h3><p>Your answer goes to the gate as usual. ClearGate never taps anything for you.</p></div>
+          <div class="step"><h3>The ad is skipped</h3><p>As soon as MyGate confirms your answer, ClearGate sends it to the background. No ad, no MyGate screen left open.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Small app, thoughtful details</h2>
+          <p>Built to stay out of your way, including when you need to use your banking apps.</p>
+        </div>
+        <div class="features">
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 19V11a6 6 0 0 1 12 0v8"/><path d="M10 12l2 2-2 2M13 12l2 2-2 2"/></svg></div>
+            <div><h3>Guests and deliveries</h3><p>Works for visitor entries and for delivery pre-approvals from apps like Swiggy, Zomato and Instamart.</p></div>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6z"/></svg></div>
+            <div><h3>Plays nicely with banking apps</h3><p>Some banking apps refuse to open while any accessibility app is on. Open them from ClearGate's widget and it pauses itself first.</p></div>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="3.5"/><rect x="3" y="14" width="8" height="6" rx="2"/><rect x="13" y="14" width="8" height="6" rx="2"/></svg></div>
+            <div><h3>Widget, tile and shortcuts</h3><p>A home-screen widget with your bank apps, a Quick Settings tile, and long-press shortcuts. Pause and resume however you like.</p></div>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+            <div><h3>Never forget to resume</h3><p>While paused, a notification keeps a Resume button handy, with a gentle nudge after 10 minutes.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy">
+      <div class="wrap">
+        <div class="privacy">
+          <div>
+            <h2>Private by design</h2>
+            <p>ClearGate uses Android's accessibility feature for one narrow job: noticing MyGate's post-answer screen and pressing Home. That's it.</p>
+          </div>
+          <ul class="checks">
+            <li>Only sees the MyGate app. Every other app is invisible to it.</li>
+            <li>No internet permission. It can't send anything, anywhere.</li>
+            <li>No accounts, no tracking, no ads of its own.</li>
+            <li>Open source. Every line is on GitHub for anyone to read.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="wrap install">
+        <div>
+          <h2>Set up in two minutes</h2>
+          <p style="color: var(--ink-soft); font-size: 18px;">ClearGate isn't on the Play Store, so you install it directly. Updates come from the same link.</p>
+          <a class="btn btn-primary" href="https://github.com/Rabbitwingz/ClearGate/releases/latest/download/ClearGate.apk" style="margin-top: 12px;">Download ClearGate.apk</a>
+        </div>
+        <ol>
+          <li>Download and open the APK<span>Allow your browser to install unknown apps if asked.</span></li>
+          <li>Follow ClearGate's short intro<span>It walks you through each setting.</span></li>
+          <li>Turn on ClearGate in Accessibility<span>ClearGate brings you straight back once it's on.</span></li>
+          <li>Let it run in the background<span>So your phone doesn't stop it to save battery.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap" style="max-width: 820px;">
+        <div class="section-head"><h2>Questions</h2></div>
+        <details>
+          <summary>The accessibility switch is greyed out</summary>
+          <p>Android 13 and newer restrict accessibility for apps installed outside the Play Store. Open Settings › Apps › ClearGate, tap ⋮ (top right) › Allow restricted settings, then turn it on again.</p>
+        </details>
+        <details>
+          <summary>My banking app says an "unauthorized app" is active</summary>
+          <p>Many banking apps block any accessibility app as an anti-fraud measure. ClearGate doesn't try to hide from them. Instead, open your banks from ClearGate's widget or long-press shortcuts: it pauses itself first, then opens the bank. Tap Resume when you're done.</p>
+        </details>
+        <details>
+          <summary>Does ClearGate approve visitors for me?</summary>
+          <p>No. You always answer the request yourself. ClearGate only acts after MyGate confirms your answer.</p>
+        </details>
+        <details>
+          <summary>Why isn't it on the Play Store?</summary>
+          <p>Play Store policy doesn't allow apps that interfere with another app's ads. ClearGate is a personal, open-source tool, so it's distributed directly from GitHub.</p>
+        </details>
+        <details>
+          <summary>It stopped working after a while</summary>
+          <p>Some phones aggressively stop background apps. Set ClearGate's battery usage to Unrestricted and check it's still on in Accessibility settings.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <svg class="logo" width="88" height="88" viewBox="0 0 108 108" role="img" aria-label="ClearGate logo"><rect width="108" height="108" rx="30" fill="#E8590C"/><path d="M30,84 V52 A24,24 0 0 1 78,52 V84" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/><path d="M43,55 L53,65 L43,75 M56,55 L66,65 L56,75" fill="none" stroke="#FFE0C2" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>Answer the gate. Skip the ad.</h2>
+      <p style="color: var(--ink-soft); font-size: 18px; margin: 0 0 26px;">Free, open source and private.</p>
+      <a class="btn btn-primary" href="https://github.com/Rabbitwingz/ClearGate/releases/latest/download/ClearGate.apk">Download for Android</a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p class="disclaimer">ClearGate is an independent, open-source personal project. It is not affiliated with, endorsed by, or connected to MyGate or Vivish Technologies. It doesn't modify MyGate or block its network traffic. It presses Home for you after you've answered, just as you could yourself.</p>
+      <p><a href="https://github.com/Rabbitwingz/ClearGate">GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>
