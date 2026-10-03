@@ -58,8 +58,13 @@ private fun GateApp(openBankingRequests: Int) {
     val context = LocalContext.current
     var onboarded by rememberSaveable { mutableStateOf(Store.isOnboarded(context)) }
     var inSettings by rememberSaveable { mutableStateOf(false) }
+    // Settings › Banking apps gets a brief highlight when opened from the banking tip or the widget's Add slot.
+    var highlightBanking by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(openBankingRequests) {
-        if (openBankingRequests > 0 && onboarded) inSettings = true
+        if (openBankingRequests > 0 && onboarded) {
+            highlightBanking = true
+            inSettings = true
+        }
     }
 
     // Re-read system state whenever we come back (e.g. from Accessibility settings).
@@ -105,12 +110,21 @@ private fun GateApp(openBankingRequests: Int) {
                 status = status,
                 prefsVersion = prefsVersion,
                 onOpenSettings = { inSettings = true },
+                onOpenBankingSettings = {
+                    highlightBanking = true
+                    inSettings = true
+                },
             )
             Screen.Settings -> SettingsScreen(
                 status = status,
-                onBack = { inSettings = false },
+                highlightBanking = highlightBanking,
+                onBack = {
+                    inSettings = false
+                    highlightBanking = false
+                },
                 onReplayIntro = {
                     inSettings = false
+                    highlightBanking = false
                     onboarded = false
                 },
             )

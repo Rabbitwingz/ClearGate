@@ -1,6 +1,9 @@
 package io.github.rabbitwingz.cleargate
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,14 +58,29 @@ import kotlinx.coroutines.withContext
  * long-press of ClearGate's icon, and can be pinned to the home screen. Here the user only manages the list.
  */
 @Composable
-fun BankingSection(modifier: Modifier = Modifier) {
+fun BankingSection(modifier: Modifier = Modifier, highlight: Boolean = false) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
+    // A brief pulse of the card's outline when the user arrives from the banking tip or the widget's Add slot.
+    val glow = remember { Animatable(0f) }
+    LaunchedEffect(highlight) {
+        if (!highlight) return@LaunchedEffect
+        repeat(2) {
+            glow.animateTo(1f, tween(350))
+            glow.animateTo(0.15f, tween(450))
+        }
+        glow.animateTo(0f, tween(600))
+    }
     val key = rememberRefreshKey()
     val banks = remember(key) { BankShortcuts.banks(context) }
     var picking by remember { mutableStateOf(false) }
 
-    Surface(shape = RoundedCornerShape(28.dp), color = colors.surfaceContainerHigh, modifier = modifier.fillMaxWidth()) {
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = colors.surfaceContainerHigh,
+        border = if (glow.value > 0f) BorderStroke(2.dp, colors.primary.copy(alpha = glow.value)) else null,
+        modifier = modifier.fillMaxWidth(),
+    ) {
         Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.AccountBalance, null, tint = colors.primary)
@@ -71,8 +89,9 @@ fun BankingSection(modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                "Some banking apps won't open while ClearGate is on. Add them here, then open them from the " +
-                    "ClearGate widget or by long-pressing ClearGate's icon: ClearGate pauses first.",
+                "Banking apps often won't open while ClearGate is on. Add yours here, then open them from the " +
+                    "ClearGate widget or by long-pressing ClearGate's icon. ClearGate pauses first, then opens " +
+                    "the bank.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant,
             )

@@ -57,7 +57,12 @@ import androidx.compose.ui.unit.dp
 /** Settings: banking apps, pausing helpers, setup, privacy and about. Opened from the gear on the home screen. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SettingsScreen(status: SetupStatus, onBack: () -> Unit, onReplayIntro: () -> Unit) {
+fun SettingsScreen(
+    status: SetupStatus,
+    highlightBanking: Boolean,
+    onBack: () -> Unit,
+    onReplayIntro: () -> Unit,
+) {
     val context = LocalContext.current
     val helpers = rememberPauseHelpers(status)
     val setReminders = rememberRemindersSwitch(status)
@@ -86,7 +91,7 @@ fun SettingsScreen(status: SetupStatus, onBack: () -> Unit, onReplayIntro: () ->
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item(key = "banking") { BankingSection() }
+            item(key = "banking") { BankingSection(highlight = highlightBanking) }
 
             item(key = "pausingHeader") { SectionHeader("Pausing") }
             item(key = "pausing") {

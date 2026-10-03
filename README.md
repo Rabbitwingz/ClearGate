@@ -51,7 +51,7 @@ Updates use the same link and install over the previous version.
 
 Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank. The easiest way is the **ClearGate widget**:
 
-- **Widget:** add it from the "Use banking apps?" card on ClearGate's home screen (or Settings › Pausing). Pick your banking apps (up to 4) and they appear on the widget. Tap one and ClearGate pauses, then the bank opens. The widget also shows whether ClearGate is on, with a Pause/Resume button; shrink it to one row for a compact version.
+- **Widget:** add your banking apps (up to 4) in ClearGate's Settings › Banking apps, then add the widget from Settings › Pausing. Your banks appear on the widget. Tap one and ClearGate pauses, then the bank opens. The widget also shows whether ClearGate is on, with a Pause/Resume button; shrink it to one row for a compact version.
 - **Other ways to open a bank with ClearGate paused:** long-press ClearGate's icon, or use **Pause & open** in Settings › Banking apps.
 - **Resume reminders** (Settings › Pausing): while paused, a notification shows **ClearGate is paused · Resume**, and nudges you once if you're still paused after about 10 minutes.
 - **Quick Settings tile** (Settings › Pausing): pause or resume from the notification shade.
