@@ -12,6 +12,17 @@ import android.service.quicksettings.TileService
  */
 class PauseTileService : TileService() {
 
+    // Keeps Settings › Pausing in sync when the user adds or removes the tile in Quick Settings' edit mode.
+    override fun onTileAdded() {
+        super.onTileAdded()
+        Store.setTileAdded(this, true)
+    }
+
+    override fun onTileRemoved() {
+        super.onTileRemoved()
+        Store.setTileAdded(this, false)
+    }
+
     override fun onStartListening() {
         super.onStartListening()
         updateTile()
@@ -48,14 +59,9 @@ class PauseTileService : TileService() {
         val tile = qsTile ?: return
         val on = !pausing && SetupStatus.read(this).serviceOn
         tile.state = if (on) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        // Just the name: the tile's highlighted (on) or dimmed (paused/off) colour shows the state.
         tile.label = getString(R.string.app_name)
-        if (Build.VERSION.SDK_INT >= 29) {
-            tile.subtitle = when {
-                on -> "On · tap to pause"
-                Store.isPaused(this) -> "Paused · tap to resume"
-                else -> "Off · tap to turn on"
-            }
-        }
+        if (Build.VERSION.SDK_INT >= 29) tile.subtitle = null
         tile.updateTile()
     }
 }

@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Store.resetStaleTileFlagOnce(this)
         handle(intent)
         setContent { ClearGateTheme { GateApp(openBankingRequests.intValue) } }
     }

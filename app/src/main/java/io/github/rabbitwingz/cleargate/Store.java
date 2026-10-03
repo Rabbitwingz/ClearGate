@@ -15,6 +15,7 @@ final class Store {
     private static final String PREFS = "cleargate";
     private static final String KEY_PAUSED = "paused_for_banking";
     private static final String KEY_TILE_ADDED = "tile_added";
+    private static final String KEY_TILE_TRACKED = "tile_add_remove_tracked";
     private static final String KEY_RESUME_REQUESTED = "resume_requested_at";
     private static final String KEY_RESUME_TO_APP = "resume_returns_to_app";
     private static final String KEY_BANKS = "bank_packages";
@@ -110,6 +111,15 @@ final class Store {
 
     static void setTileAdded(Context c, boolean added) {
         prefs(c).edit().putBoolean(KEY_TILE_ADDED, added).apply();
+    }
+
+    /**
+     * Versions before 1.35 couldn't tell when the tile was removed, so their "added" flag may be stale. Reset it once;
+     * from then on the tile service tracks adds and removes (and Android's add prompt answers "already added").
+     */
+    static void resetStaleTileFlagOnce(Context c) {
+        if (prefs(c).getBoolean(KEY_TILE_TRACKED, false)) return;
+        prefs(c).edit().putBoolean(KEY_TILE_ADDED, false).putBoolean(KEY_TILE_TRACKED, true).apply();
     }
 
     static int skippedCount(Context c) {
