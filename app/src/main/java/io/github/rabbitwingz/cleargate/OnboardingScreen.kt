@@ -275,7 +275,8 @@ fun SetupSteps(status: SetupStatus) {
             title = "Turn on ClearGate",
             body = "Accessibility › ClearGate › On",
             actionLabel = "Open",
-            onAction = { SystemScreens.accessibility(context) },
+            // Comes back to ClearGate (same screen) once it's switched on.
+            onAction = { PauseControl.resume(context, returnToApp = true) },
         )
         SetupStep(
             done = status.batteryUnrestricted,

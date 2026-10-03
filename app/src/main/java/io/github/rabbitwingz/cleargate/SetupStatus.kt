@@ -58,7 +58,6 @@ val restrictedSettingsApply: Boolean get() = Build.VERSION.SDK_INT >= 33
 const val REPO_URL = "https://github.com/Rabbitwingz/ClearGate"
 
 object SystemScreens {
-    fun accessibility(context: Context) = start(context, Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
 
     fun appInfo(context: Context) = start(
         context,

@@ -125,8 +125,8 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onOpenSettings: () -> Uni
                 StatusHero(
                     mode = mode,
                     onPause = { PauseControl.pause(context) },
-                    onResume = { PauseControl.resume(context) },
-                    onSetUp = { SystemScreens.accessibility(context) },
+                    onResume = { PauseControl.resume(context, returnToApp = true) },
+                    onSetUp = { PauseControl.resume(context, returnToApp = true) },
                 )
             }
             item(key = "stats") { StatsRow(skipped = skipped, lastSkipped = lastSkipped) }

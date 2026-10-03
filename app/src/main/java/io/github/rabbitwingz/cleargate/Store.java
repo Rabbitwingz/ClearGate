@@ -16,6 +16,7 @@ final class Store {
     private static final String KEY_PAUSED = "paused_for_banking";
     private static final String KEY_TILE_ADDED = "tile_added";
     private static final String KEY_RESUME_REQUESTED = "resume_requested_at";
+    private static final String KEY_RESUME_TO_APP = "resume_returns_to_app";
     private static final String KEY_BANKS = "bank_packages";
     private static final String KEY_REMINDERS = "resume_reminders";
     private static final String KEY_WIDGET_PROMO_DISMISSED = "widget_promo_dismissed";
@@ -62,8 +63,17 @@ final class Store {
         return prefs(c).getLong(KEY_RESUME_REQUESTED, 0);
     }
 
-    static void setResumeRequestedAt(Context c, long millis) {
-        prefs(c).edit().putLong(KEY_RESUME_REQUESTED, millis).apply();
+    /**
+     * Records a request to switch ClearGate on. {@code returnToApp}: it came from inside ClearGate (setup, status
+     * card), so once it's on the user goes back to ClearGate; otherwise (tile, widget, notification) to the home
+     * screen.
+     */
+    static void setResumeRequest(Context c, long millis, boolean returnToApp) {
+        prefs(c).edit().putLong(KEY_RESUME_REQUESTED, millis).putBoolean(KEY_RESUME_TO_APP, returnToApp).apply();
+    }
+
+    static boolean resumeReturnsToApp(Context c) {
+        return prefs(c).getBoolean(KEY_RESUME_TO_APP, false);
     }
 
     /** Whether to show the "paused · Resume" notification and the 10-minute nudge (Settings › Resume reminders). */

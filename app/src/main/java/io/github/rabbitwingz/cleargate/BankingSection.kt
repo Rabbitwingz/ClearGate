@@ -1,6 +1,5 @@
 package io.github.rabbitwingz.cleargate
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -28,7 +27,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,8 +51,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Settings › Banking apps: the user's "Pause & open" bank shortcuts. Each one pauses ClearGate and opens the bank in
- * one tap; the same shortcuts appear on a long-press of ClearGate's icon and can be pinned to the home screen.
+ * Settings › Banking apps: the banking apps that open with ClearGate paused. They appear on the widget, on a
+ * long-press of ClearGate's icon, and can be pinned to the home screen. Here the user only manages the list.
  */
 @Composable
 fun BankingSection(modifier: Modifier = Modifier) {
@@ -73,8 +71,8 @@ fun BankingSection(modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                "Some banking apps won't open while ClearGate is on. Add them here, then open them with " +
-                    "Pause & open: ClearGate pauses first. Tap Resume in the notification when you're done.",
+                "Some banking apps won't open while ClearGate is on. Add them here, then open them from the " +
+                    "ClearGate widget or by long-pressing ClearGate's icon: ClearGate pauses first.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant,
             )
@@ -83,12 +81,6 @@ fun BankingSection(modifier: Modifier = Modifier) {
             banks.forEach { app ->
                 BankRow(
                     app = app,
-                    onOpen = {
-                        context.startActivity(
-                            Intent(context, BankLaunchActivity::class.java)
-                                .putExtra(BankLaunchActivity.EXTRA_PACKAGE, app.packageName)
-                        )
-                    },
                     onPin = {
                         if (!BankShortcuts.pinToHomeScreen(context, app)) {
                             Toast.makeText(context, "Your launcher doesn't support this", Toast.LENGTH_SHORT).show()
@@ -121,7 +113,7 @@ fun BankingSection(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BankRow(app: LaunchableApp, onOpen: () -> Unit, onPin: () -> Unit, onRemove: () -> Unit) {
+private fun BankRow(app: LaunchableApp, onPin: () -> Unit, onRemove: () -> Unit) {
     var menuOpen by remember { mutableStateOf(false) }
     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Image(
@@ -137,7 +129,6 @@ private fun BankRow(app: LaunchableApp, onOpen: () -> Unit, onPin: () -> Unit, o
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        FilledTonalButton(onClick = onOpen) { Text("Pause & open") }
         Box {
             IconButton(onClick = { menuOpen = true }) { Icon(Icons.Rounded.MoreVert, "More options for ${app.label}") }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {

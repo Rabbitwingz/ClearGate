@@ -31,14 +31,19 @@ object PauseControl {
         return true
     }
 
-    /** Starts resuming: remembers the request (see onResumed), then opens Accessibility settings. */
-    fun resume(context: Context) {
-        context.startActivity(Intent(context, ResumeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    /**
+     * Switches ClearGate on (first setup or resuming): remembers the request, then opens Accessibility settings. Once
+     * the user turns it on, the service brings them back: to ClearGate if {@code returnToApp}, else the home screen.
+     */
+    fun resume(context: Context, returnToApp: Boolean = false) {
+        context.startActivity(resumeActivityIntent(context, returnToApp))
     }
 
-    /** Intent for tiles, widgets and notifications that start a resume. */
-    fun resumeActivityIntent(context: Context): Intent =
-        Intent(context, ResumeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    /** Intent that starts a resume; tiles, widgets and notifications use it without returnToApp. */
+    fun resumeActivityIntent(context: Context, returnToApp: Boolean = false): Intent =
+        Intent(context, ResumeActivity::class.java)
+            .putExtra(ResumeActivity.EXTRA_RETURN_TO_APP, returnToApp)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     /** Called by the service when accessibility is back on: clears the paused state and its reminders. */
     fun onResumed(context: Context) {

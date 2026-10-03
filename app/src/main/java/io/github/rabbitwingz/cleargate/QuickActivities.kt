@@ -9,14 +9,19 @@ import android.os.SystemClock
 import android.widget.Toast
 
 /**
- * Invisible step behind every Resume button (tile, notification, widget, app): remembers that the user asked to
- * resume, so that once they switch ClearGate on and tap Allow, the service can take them out of Settings, then opens
- * Accessibility settings.
+ * Invisible step behind every way of switching ClearGate on (tile, notification, widget, and in-app setup and
+ * Resume): remembers the request, so that once the user switches ClearGate on and taps Allow the service can take
+ * them out of Settings, back to ClearGate (EXTRA_RETURN_TO_APP) or to the home screen. Then opens Accessibility
+ * settings.
  */
 class ResumeActivity : Activity() {
+    companion object {
+        const val EXTRA_RETURN_TO_APP = "return_to_app"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Store.setResumeRequestedAt(this, System.currentTimeMillis())
+        Store.setResumeRequest(this, System.currentTimeMillis(), intent.getBooleanExtra(EXTRA_RETURN_TO_APP, false))
         if (!PauseControl.openAccessibilitySettings(this)) {
             Toast.makeText(this, "Open Settings › Accessibility to turn ClearGate on", Toast.LENGTH_LONG).show()
         }

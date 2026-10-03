@@ -69,15 +69,26 @@ public class AdSkipService extends AccessibilityService {
         Store.dropLegacyData(this);
         // Switched back on: no longer paused, so clear the paused notification and nudge.
         PauseControl.INSTANCE.onResumed(this);
-        // If the user came here via a Resume button, take them out of Settings (they're a few screens deep) and
-        // confirm. Only right after a resume request, so a reboot or update never sends anyone Home.
+        // If the user got here from a ClearGate button, take them out of Settings (they're a few screens deep): back to
+        // ClearGate if they started in the app, else to the home screen. Only right after such a request, so a
+        // reboot or update never moves anyone.
         long requested = Store.resumeRequestedAt(this);
         if (requested > 0 && System.currentTimeMillis() - requested < RESUME_WINDOW_MS) {
-            Store.setResumeRequestedAt(this, 0);
-            handler.postDelayed(() -> {
-                performGlobalAction(GLOBAL_ACTION_HOME);
-                Toast.makeText(this, "ClearGate is back on", Toast.LENGTH_SHORT).show();
-            }, LEAVE_SETTINGS_DELAY_MS);
+            boolean toApp = Store.resumeReturnsToApp(this);
+            Store.setResumeRequest(this, 0, false);
+            handler.postDelayed(() -> leaveSettings(toApp), LEAVE_SETTINGS_DELAY_MS);
+        }
+    }
+
+    private void leaveSettings(boolean toApp) {
+        if (toApp) {
+            // Brings the existing ClearGate screen back as it was (an accessibility service may start activities).
+            startActivity(new Intent(this, MainActivity.class).addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+            Toast.makeText(this, "ClearGate is on", Toast.LENGTH_SHORT).show();
+        } else {
+            performGlobalAction(GLOBAL_ACTION_HOME);
+            Toast.makeText(this, "ClearGate is back on", Toast.LENGTH_SHORT).show();
         }
     }
 

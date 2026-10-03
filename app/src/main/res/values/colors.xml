@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#2F6A3F</color>
+    <color name="ic_launcher_background">#E8590C</color>
     <color name="window_background">#F6FBF3</color>
     <!-- Widget colours (brand palette); Android 12+ uses wallpaper colours instead (values-v31). -->
     <color name="widget_surface">#F0F5ED</color>
