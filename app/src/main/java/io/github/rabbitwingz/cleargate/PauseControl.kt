@@ -25,10 +25,16 @@ object PauseControl {
         return true
     }
 
-    /** Opens the screen where the user switches ClearGate back on: its own switch on Android 13+, the list before. */
+    /**
+     * Settings' page for one accessibility service. Not a public SDK constant, but present since Android 11; it only
+     * opens services belonging to the calling app, which is what we want.
+     */
+    private const val ACTION_ACCESSIBILITY_DETAILS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS"
+
+    /** Opens the screen where the user switches ClearGate back on: its own switch where available, else the list. */
     fun resumeIntent(context: Context): Intent {
-        if (Build.VERSION.SDK_INT >= 33) {
-            val details = Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS)
+        if (Build.VERSION.SDK_INT >= 30) {
+            val details = Intent(ACTION_ACCESSIBILITY_DETAILS)
                 .putExtra(
                     Intent.EXTRA_COMPONENT_NAME,
                     ComponentName(context, AdSkipService::class.java).flattenToString(),
