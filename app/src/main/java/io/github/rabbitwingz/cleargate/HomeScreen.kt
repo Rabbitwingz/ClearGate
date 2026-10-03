@@ -20,9 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.GppGood
 import androidx.compose.material.icons.rounded.GppMaybe
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.AccountBalance
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.Widgets
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.rounded.PauseCircle
 import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material.icons.rounded.Replay
@@ -38,7 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -80,6 +81,8 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onOpenSettings: () -> Uni
     val skipped = remember(prefsVersion) { Store.skippedCount(context) }
     val lastSkipped = remember(prefsVersion) { Store.lastSkippedAt(context) }
     val log = remember(prefsVersion) { readLog(context) }
+    val promoDismissed = remember(prefsVersion) { Store.isWidgetPromoDismissed(context) }
+    val helpers = rememberPauseHelpers(status)
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -126,10 +129,12 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onOpenSettings: () -> Uni
                     onSetUp = { SystemScreens.accessibility(context) },
                 )
             }
-            if (mode == Mode.On) {
-                item(key = "bankingPill") { BankingPill(onClick = onOpenSettings) }
-            }
             item(key = "stats") { StatsRow(skipped = skipped, lastSkipped = lastSkipped) }
+            if (mode != Mode.NotSetUp && !helpers.widgetAdded && !promoDismissed) {
+                item(key = "widgetPromo") {
+                    WidgetPromoCard(onDismiss = { Store.setWidgetPromoDismissed(context, true) })
+                }
+            }
 
             if (mode == Mode.NotSetUp || !status.batteryUnrestricted) {
                 item(key = "setupHeader") { SectionHeader("Finish setup") }
@@ -155,27 +160,53 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onOpenSettings: () -> Uni
 
 }
 
-/** Points people whose banking app refuses to open (because ClearGate is on) to Settings › Banking apps. */
+/**
+ * One-time card pointing to the widget, the quickest way to open banking apps with ClearGate paused. "Set it up"
+ * asks for banking apps first if none are added yet, then asks the launcher to place the widget. Hidden for good
+ * once dismissed or once a widget is on the home screen.
+ */
 @Composable
-private fun BankingPill(onClick: () -> Unit) {
+private fun WidgetPromoCard(onDismiss: () -> Unit) {
+    val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    Surface(
-        onClick = onClick,
-        shape = CircleShape,
-        color = colors.secondaryContainer,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(Modifier.padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.AccountBalance, null, tint = colors.onSecondaryContainer)
-            Spacer(Modifier.width(12.dp))
-            Text(
-                "Banking app won't open? Pause ClearGate",
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.onSecondaryContainer,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = colors.onSecondaryContainer)
+    var picking by remember { mutableStateOf(false) }
+
+    Surface(shape = RoundedCornerShape(28.dp), color = colors.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(start = 20.dp, end = 12.dp, top = 18.dp, bottom = 8.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(Icons.Rounded.Widgets, null, tint = colors.onSecondaryContainer)
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f).padding(end = 8.dp)) {
+                    Text("Use banking apps?", style = MaterialTheme.typography.titleMedium, color = colors.onSecondaryContainer)
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "Add the ClearGate widget to open them in one tap. ClearGate pauses itself first, so " +
+                            "they don't complain.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSecondaryContainer,
+                    )
+                }
+            }
+            Row(Modifier.align(Alignment.End)) {
+                TextButton(onClick = onDismiss) { Text("Not now") }
+                Spacer(Modifier.width(4.dp))
+                Button(onClick = {
+                    if (BankShortcuts.banks(context).isEmpty()) picking = true else addWidget(context)
+                }) { Text("Set it up") }
+            }
         }
+    }
+
+    if (picking) {
+        BankPickerDialog(
+            exclude = emptySet(),
+            onDone = { picked ->
+                BankShortcuts.add(context, picked)
+                picking = false
+                addWidget(context)
+            },
+            onDismiss = { picking = false },
+        )
     }
 }
 
@@ -243,7 +274,14 @@ private fun StatusHero(mode: Mode, onPause: () -> Unit, onResume: () -> Unit, on
             )
             Spacer(Modifier.height(16.dp))
             when (mode) {
-                Mode.On -> FilledTonalButton(onClick = onPause) {
+                // Inverted colours (light on the teal card) so the button stands out from the card.
+                Mode.On -> Button(
+                    onClick = onPause,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.onPrimaryContainer,
+                        contentColor = colors.primaryContainer,
+                    ),
+                ) {
                     Icon(Icons.Rounded.PauseCircle, null)
                     Spacer(Modifier.width(8.dp))
                     Text("Pause for banking")

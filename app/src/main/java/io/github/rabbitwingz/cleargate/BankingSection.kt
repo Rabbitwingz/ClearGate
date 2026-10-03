@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -110,8 +111,8 @@ fun BankingSection(modifier: Modifier = Modifier) {
     if (picking) {
         BankPickerDialog(
             exclude = banks.map { it.packageName }.toSet(),
-            onPick = {
-                BankShortcuts.add(context, it)
+            onDone = { picked ->
+                BankShortcuts.add(context, picked)
                 picking = false
             },
             onDismiss = { picking = false },
@@ -147,20 +148,32 @@ private fun BankRow(app: LaunchableApp, onOpen: () -> Unit, onPin: () -> Unit, o
     }
 }
 
+/**
+ * Picks banking apps to add (several at once, up to MAX_BANKS in total). {@code exclude}: banks already added.
+ * Used by Settings › Banking apps and the home screen's widget card.
+ */
 @Composable
-private fun BankPickerDialog(exclude: Set<String>, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+fun BankPickerDialog(exclude: Set<String>, onDone: (List<String>) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var apps by remember { mutableStateOf<List<LaunchableApp>?>(null) }
     var query by remember { mutableStateOf("") }
+    var selected by remember { mutableStateOf(emptyList<String>()) }
+    val roomLeft = BankShortcuts.MAX_BANKS - exclude.size
     LaunchedEffect(Unit) {
         apps = withContext(Dispatchers.Default) { BankShortcuts.launchableApps(context) }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Choose a banking app") },
+        title = { Text("Choose your banking apps") },
         text = {
             Column {
+                Text(
+                    if (roomLeft == 1) "You can add 1 more." else "You can add up to $roomLeft.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -177,25 +190,41 @@ private fun BankPickerDialog(exclude: Set<String>, onPick: (String) -> Unit, onD
                     }
                 } else {
                     val shown = list.filter { it.packageName !in exclude && it.label.contains(query.trim(), ignoreCase = true) }
-                    LazyColumn(Modifier.heightIn(max = 360.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    LazyColumn(Modifier.heightIn(max = 340.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         items(shown, key = { it.packageName }) { app ->
+                            val checked = app.packageName in selected
+                            val enabled = checked || selected.size < roomLeft
                             Row(
                                 Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable { onPick(app.packageName) }
-                                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                                    .clickable(enabled = enabled) {
+                                        selected = if (checked) selected - app.packageName else selected + app.packageName
+                                    }
+                                    .padding(horizontal = 4.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Image(app.icon.asImageBitmap(), null, Modifier.size(36.dp))
                                 Spacer(Modifier.width(12.dp))
-                                Text(app.label, style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    app.label,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (enabled) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
                             }
                         }
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = {
+            TextButton(onClick = { onDone(selected) }, enabled = selected.isNotEmpty()) {
+                Text(if (selected.isEmpty()) "Add" else "Add ${selected.size}")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }

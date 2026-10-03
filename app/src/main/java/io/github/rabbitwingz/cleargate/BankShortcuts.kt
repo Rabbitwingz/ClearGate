@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.net.Uri
 
 /** An app on the phone that can be launched (used for the bank picker and shortcuts). */
 data class LaunchableApp(val packageName: String, val label: String, val icon: Bitmap)
@@ -24,8 +25,8 @@ object BankShortcuts {
     fun banks(context: Context): List<LaunchableApp> =
         Store.bankPackages(context).mapNotNull { app(context, it) }.sortedBy { it.label.lowercase() }
 
-    fun add(context: Context, packageName: String) {
-        Store.setBankPackages(context, Store.bankPackages(context) + packageName)
+    fun add(context: Context, packageNames: Collection<String>) {
+        Store.setBankPackages(context, Store.bankPackages(context) + packageNames)
         publish(context)
     }
 
@@ -35,11 +36,20 @@ object BankShortcuts {
         context.getSystemService(ShortcutManager::class.java)?.disableShortcuts(listOf(shortcutId(packageName)))
     }
 
-    /** Replaces the long-press shortcuts with the current bank list. */
+    /** Replaces the long-press shortcuts with the current bank list, and redraws the widget's bank row. */
     fun publish(context: Context) {
-        val manager = context.getSystemService(ShortcutManager::class.java) ?: return
-        manager.dynamicShortcuts = banks(context).take(MAX_BANKS).map { shortcut(context, it) }
+        context.getSystemService(ShortcutManager::class.java)?.let { manager ->
+            manager.dynamicShortcuts = banks(context).take(MAX_BANKS).map { shortcut(context, it) }
+        }
+        ClearGateWidget.refresh(context)
     }
+
+    /** Opens the bank via BankLaunchActivity (pause first, then launch). Distinct per bank for PendingIntents. */
+    fun launchIntent(context: Context, packageName: String): Intent =
+        Intent(context, BankLaunchActivity::class.java)
+            .setAction(Intent.ACTION_VIEW)
+            .setData(Uri.fromParts("bank", packageName, null))
+            .putExtra(BankLaunchActivity.EXTRA_PACKAGE, packageName)
 
     /** Asks the launcher to put this bank's shortcut on the home screen. Returns false if it can't. */
     fun pinToHomeScreen(context: Context, app: LaunchableApp): Boolean {
@@ -73,11 +83,7 @@ object BankShortcuts {
             .setShortLabel(app.label)
             .setLongLabel("Pause & open ${app.label}")
             .setIcon(Icon.createWithBitmap(app.icon))
-            .setIntent(
-                Intent(context, BankLaunchActivity::class.java)
-                    .setAction(Intent.ACTION_VIEW)
-                    .putExtra(BankLaunchActivity.EXTRA_PACKAGE, app.packageName)
-            )
+            .setIntent(launchIntent(context, app.packageName))
             .build()
 
     private fun shortcutId(packageName: String) = "bank:$packageName"

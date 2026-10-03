@@ -18,6 +18,7 @@ final class Store {
     private static final String KEY_RESUME_REQUESTED = "resume_requested_at";
     private static final String KEY_BANKS = "bank_packages";
     private static final String KEY_REMINDERS = "resume_reminders";
+    private static final String KEY_WIDGET_PROMO_DISMISSED = "widget_promo_dismissed";
     private static final String KEY_LOG = "activity_log";
     private static final String KEY_SKIPPED = "skipped_count";
     private static final String KEY_LAST_SKIPPED = "last_skipped_at";
@@ -72,6 +73,15 @@ final class Store {
 
     static void setRemindersEnabled(Context c, boolean enabled) {
         prefs(c).edit().putBoolean(KEY_REMINDERS, enabled).apply();
+    }
+
+    /** The home screen's one-time "Use banking apps? Add the widget" card was dismissed. */
+    static boolean isWidgetPromoDismissed(Context c) {
+        return prefs(c).getBoolean(KEY_WIDGET_PROMO_DISMISSED, false);
+    }
+
+    static void setWidgetPromoDismissed(Context c, boolean dismissed) {
+        prefs(c).edit().putBoolean(KEY_WIDGET_PROMO_DISMISSED, dismissed).apply();
     }
 
     /** Package names of the banking apps the user picked for "Pause & open" shortcuts. */

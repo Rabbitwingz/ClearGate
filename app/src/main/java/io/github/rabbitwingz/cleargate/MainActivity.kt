@@ -1,5 +1,6 @@
 package io.github.rabbitwingz.cleargate
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,10 +26,27 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+    /** Bumped each time something (the widget's Add slot) asks to open Settings › Banking apps. */
+    private val openBankingRequests = mutableIntStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { ClearGateTheme { GateApp() } }
+        handle(intent)
+        setContent { ClearGateTheme { GateApp(openBankingRequests.intValue) } }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handle(intent)
+    }
+
+    private fun handle(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_BANKING, false) == true) openBankingRequests.intValue++
+    }
+
+    companion object {
+        const val EXTRA_OPEN_BANKING = "open_banking"
     }
 }
 
@@ -36,10 +54,13 @@ private enum class Screen { Onboarding, Home, Settings }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun GateApp() {
+private fun GateApp(openBankingRequests: Int) {
     val context = LocalContext.current
     var onboarded by rememberSaveable { mutableStateOf(Store.isOnboarded(context)) }
     var inSettings by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(openBankingRequests) {
+        if (openBankingRequests > 0 && onboarded) inSettings = true
+    }
 
     // Re-read system state whenever we come back (e.g. from Accessibility settings).
     var status by remember { mutableStateOf(SetupStatus.read(context)) }
