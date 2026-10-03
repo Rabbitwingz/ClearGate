@@ -52,11 +52,7 @@ class ClearGateWidget : AppWidgetProvider() {
         private fun build(context: Context, layout: Int, state: State, compact: Boolean): RemoteViews {
             val views = RemoteViews(context.packageName, layout)
 
-            if (compact) {
-                // The logo stands in for the status line: full strength when on, dimmed when paused or off.
-                views.setInt(R.id.widget_logo, "setImageAlpha", if (state.on) 255 else 110)
-                views.setOnClickPendingIntent(R.id.widget_logo, openApp(context, banking = false))
-            } else {
+            if (!compact) {
                 views.setTextViewText(
                     R.id.widget_status,
                     when {
@@ -68,7 +64,21 @@ class ClearGateWidget : AppWidgetProvider() {
                 views.setOnClickPendingIntent(R.id.widget_root, openApp(context, banking = false))
             }
 
-            views.setTextViewText(R.id.widget_button, if (state.on) "Pause" else if (state.paused) "Resume" else "Turn on")
+            // ClearGate's button shows its state: filled while on ("Pause"), outlined while paused or off. In the
+            // compact layout it's a pill with the ClearGate mark, which is the only place the mark appears.
+            val label = if (state.on) "Pause" else if (state.paused) "Resume" else "Turn on"
+            val labelId = if (compact) R.id.widget_button_label else R.id.widget_button
+            val foreground = context.getColor(if (state.on) R.color.widget_on_accent else R.color.widget_accent)
+            views.setTextViewText(labelId, label)
+            views.setTextColor(labelId, foreground)
+            views.setInt(
+                R.id.widget_button, "setBackgroundResource",
+                if (state.on) R.drawable.widget_button else R.drawable.widget_button_outline,
+            )
+            if (compact) {
+                views.setInt(R.id.widget_button_icon, "setColorFilter", foreground)
+                views.setContentDescription(R.id.widget_button, "ClearGate: $label")
+            }
             views.setOnClickPendingIntent(R.id.widget_button, buttonIntent(context, state.on))
 
             for (i in BANK_ICONS.indices) {

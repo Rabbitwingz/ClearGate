@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Compact widget (4x1, used on Android 12+ when resized down): logo (dimmed while paused), bank icons, Add,
-     Pause/Resume. -->
+<!-- Compact widget (4x1, used on Android 12+ when resized down). Left: the user's banks and Add, all the same size.
+     Right: ClearGate's one control, a pill with the ClearGate mark and Pause/Resume. The mark only appears inside
+     the pill, so it can't be mistaken for another app. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -8,15 +9,8 @@
     android:background="@drawable/widget_background"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="14dp"
+    android:paddingStart="12dp"
     android:paddingEnd="10dp">
-
-    <ImageView
-        android:id="@+id/widget_logo"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:contentDescription="@string/app_name"
-        android:src="@mipmap/ic_launcher" />
 
     <ImageView
         android:id="@+id/bank_icon_0"
@@ -46,22 +40,37 @@
         android:padding="8dp"
         android:src="@drawable/ic_widget_add" />
 
-    <!-- Spacer pushing the button to the end. Widgets can't use a plain View, so it's an empty FrameLayout. -->
+    <!-- Spacer pushing the pill to the end. Widgets can't use a plain View, so it's an empty FrameLayout. -->
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_weight="1" />
 
-    <TextView
+    <LinearLayout
         android:id="@+id/widget_button"
         android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:text="@string/widget_pause"
+        android:layout_height="36dp"
         android:background="@drawable/widget_button"
-        android:gravity="center"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:textColor="@color/widget_on_accent"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:id="@+id/widget_button_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_tile" />
+
+        <TextView
+            android:id="@+id/widget_button_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="@string/widget_pause"
+            android:textColor="@color/widget_on_accent"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </LinearLayout>
