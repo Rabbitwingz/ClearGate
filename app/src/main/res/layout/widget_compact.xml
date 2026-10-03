@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Compact widget (4x1, used on Android 12+ when resized down): status dot, bank icons, Add, Pause/Resume. -->
+<!-- Compact widget (4x1, used on Android 12+ when resized down): logo (dimmed while paused), bank icons, Add,
+     Pause/Resume. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -11,11 +12,11 @@
     android:paddingEnd="10dp">
 
     <ImageView
-        android:id="@+id/widget_dot"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:src="@drawable/widget_dot_on"
-        android:contentDescription="@null" />
+        android:id="@+id/widget_logo"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:contentDescription="@string/app_name"
+        android:src="@mipmap/ic_launcher" />
 
     <ImageView
         android:id="@+id/bank_icon_0"

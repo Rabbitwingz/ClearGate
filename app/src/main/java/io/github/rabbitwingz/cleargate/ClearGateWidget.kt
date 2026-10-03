@@ -53,7 +53,9 @@ class ClearGateWidget : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, layout)
 
             if (compact) {
-                views.setImageViewResource(R.id.widget_dot, if (state.on) R.drawable.widget_dot_on else R.drawable.widget_dot_off)
+                // The logo stands in for the status line: full strength when on, dimmed when paused or off.
+                views.setInt(R.id.widget_logo, "setImageAlpha", if (state.on) 255 else 110)
+                views.setOnClickPendingIntent(R.id.widget_logo, openApp(context, banking = false))
             } else {
                 views.setTextViewText(
                     R.id.widget_status,
