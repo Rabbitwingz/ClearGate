@@ -1,6 +1,7 @@
 package io.github.rabbitwingz.cleargate
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -80,8 +81,14 @@ object SystemScreens {
 
     fun web(context: Context, url: String) = start(context, Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 
+    /**
+     * From a ClearGate screen, opens the system screen in ClearGate's own task, so it appears over ClearGate and Back
+     * returns there. With FLAG_ACTIVITY_NEW_TASK it would join any Settings task left in the background (e.g. after
+     * ClearGate brings the user back from Accessibility settings) and show over that instead.
+     */
     private fun start(context: Context, intent: Intent): Boolean = try {
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
         true
     } catch (_: ActivityNotFoundException) {
         false
