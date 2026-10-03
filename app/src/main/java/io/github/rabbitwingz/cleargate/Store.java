@@ -7,11 +7,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /** Settings, stats and a short activity log, all in SharedPreferences. */
 final class Store {
     private static final String PREFS = "cleargate";
     private static final String KEY_PAUSED = "paused_for_banking";
     private static final String KEY_TILE_ADDED = "tile_added";
+    private static final String KEY_RESUME_REQUESTED = "resume_requested_at";
+    private static final String KEY_BANKS = "bank_packages";
     private static final String KEY_LOG = "activity_log";
     private static final String KEY_SKIPPED = "skipped_count";
     private static final String KEY_LAST_SKIPPED = "last_skipped_at";
@@ -45,6 +50,27 @@ final class Store {
 
     static void setPaused(Context c, boolean paused) {
         prefs(c).edit().putBoolean(KEY_PAUSED, paused).apply();
+    }
+
+    /**
+     * When the user last asked to resume (tile, notification, widget or app), so that when accessibility comes back on
+     * the service can take them out of Settings. 0 if no resume is pending.
+     */
+    static long resumeRequestedAt(Context c) {
+        return prefs(c).getLong(KEY_RESUME_REQUESTED, 0);
+    }
+
+    static void setResumeRequestedAt(Context c, long millis) {
+        prefs(c).edit().putLong(KEY_RESUME_REQUESTED, millis).apply();
+    }
+
+    /** Package names of the banking apps the user picked for "Pause & open" shortcuts. */
+    static Set<String> bankPackages(Context c) {
+        return new HashSet<>(prefs(c).getStringSet(KEY_BANKS, new HashSet<>()));
+    }
+
+    static void setBankPackages(Context c, Set<String> packages) {
+        prefs(c).edit().putStringSet(KEY_BANKS, new HashSet<>(packages)).apply();
     }
 
     /** Whether the pause tile is in Quick Settings, as far as we know (only Android 13+'s add prompt reports it). */

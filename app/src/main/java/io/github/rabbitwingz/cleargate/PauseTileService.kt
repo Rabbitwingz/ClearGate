@@ -32,7 +32,7 @@ class PauseTileService : TileService() {
 
     @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun openResumeScreen() {
-        val intent = PauseControl.resumeIntent(this)
+        val intent = PauseControl.resumeActivityIntent(this)
         if (Build.VERSION.SDK_INT >= 34) {
             startActivityAndCollapse(
                 PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

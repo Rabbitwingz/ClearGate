@@ -1,6 +1,5 @@
 package io.github.rabbitwingz.cleargate
 
-import android.os.Build
 import android.text.format.DateUtils
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -18,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.GppGood
@@ -85,7 +83,6 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
     val context = LocalContext.current
     // prefsVersion changes whenever the service writes, so these re-read live.
     val paused = remember(prefsVersion) { Store.isPaused(context) }
-    val tileAdded = remember(prefsVersion) { Store.isTileAdded(context) }
     val skipped = remember(prefsVersion) { Store.skippedCount(context) }
     val lastSkipped = remember(prefsVersion) { Store.lastSkippedAt(context) }
     val log = remember(prefsVersion) { readLog(context) }
@@ -156,8 +153,8 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
             }
             item(key = "stats") { StatsRow(skipped = skipped, lastSkipped = lastSkipped) }
 
-            if (mode != Mode.NotSetUp && !tileAdded) {
-                item(key = "banking") { BankingTileCard() }
+            if (mode != Mode.NotSetUp) {
+                item(key = "banking") { BankingSection(status) }
             }
             if (mode == Mode.NotSetUp || !status.batteryUnrestricted) {
                 item(key = "setupHeader") { SectionHeader("Finish setup") }
@@ -268,48 +265,6 @@ private fun StatusHero(mode: Mode, onPause: () -> Unit, onResume: () -> Unit, on
                     Text("Resume")
                 }
                 Mode.NotSetUp -> Button(onClick = onSetUp) { Text("Turn on") }
-            }
-        }
-    }
-}
-
-/** Explains the pause tile for banking apps, with Android 13+'s one-tap "Add tile" prompt. */
-@Composable
-fun BankingTileCard() {
-    val context = LocalContext.current
-    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
-        Column(Modifier.fillMaxWidth().padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.AccountBalance, null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    "Banking apps complaining?",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                if (PauseControl.canPromptToAddTile) {
-                    "Some banking apps won't open while an accessibility app is on. Add the Pause ClearGate tile to " +
-                        "Quick Settings: tap it before banking, and tap it again afterwards to resume."
-                } else {
-                    "Some banking apps won't open while an accessibility app is on. Pull down Quick Settings, tap " +
-                        "the edit (pencil) button and add Pause ClearGate. Tap it before banking, and again " +
-                        "afterwards to resume."
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-            )
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.align(Alignment.End)) {
-                TextButton(onClick = { Store.setTileAdded(context, true) }) { Text("Dismiss") }
-                if (PauseControl.canPromptToAddTile) {
-                    Spacer(Modifier.width(8.dp))
-                    FilledTonalButton(onClick = {
-                        if (Build.VERSION.SDK_INT >= 33) PauseControl.promptToAddTile(context)
-                    }) { Text("Add tile") }
-                }
             }
         }
     }

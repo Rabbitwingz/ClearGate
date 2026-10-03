@@ -1,6 +1,7 @@
 package io.github.rabbitwingz.cleargate
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
@@ -15,6 +16,8 @@ data class SetupStatus(
     val serviceOn: Boolean,
     val batteryUnrestricted: Boolean,
     val myGateInstalled: Boolean,
+    /** Needed for the "paused · Resume" notification and the 10-minute nudge. */
+    val notificationsAllowed: Boolean,
 ) {
     val ready: Boolean get() = serviceOn
 
@@ -23,6 +26,8 @@ data class SetupStatus(
             serviceOn = isServiceEnabled(context),
             batteryUnrestricted = isBatteryUnrestricted(context),
             myGateInstalled = isMyGateInstalled(context),
+            notificationsAllowed = context.getSystemService(NotificationManager::class.java)
+                ?.areNotificationsEnabled() ?: false,
         )
 
         private fun isServiceEnabled(context: Context): Boolean {
@@ -68,6 +73,11 @@ object SystemScreens {
         )
         if (!start(context, ask)) start(context, Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
     }
+
+    fun appNotifications(context: Context) = start(
+        context,
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+    )
 
     fun web(context: Context, url: String) = start(context, Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 

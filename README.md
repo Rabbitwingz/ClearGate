@@ -49,13 +49,15 @@ Updates use the same link and install over the previous version.
 <details>
 <summary><b>My banking app says "Unauthorized app" or "Accessibility permission detected"</b></summary>
 
-Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank:
+Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank. The **Banking apps** card in ClearGate sets this up:
 
-1. Add the **Pause ClearGate** tile to Quick Settings. On Android 13+, use **Add tile** in the app; on older versions, pull down Quick Settings, tap the edit (pencil) button and drag it in.
-2. **Before banking:** tap the tile. ClearGate switches its accessibility off, so the bank app sees nothing.
-3. **After banking:** tap the tile again. It opens Accessibility settings: tap **ClearGate** (on some phones it's under *Installed apps* or *Downloaded apps*), turn it on and tap **Allow**. Android only lets *you* switch accessibility on, which is why this takes a few taps.
+- **Pause & open:** add your banking apps once. Then open them with **Pause & open** in ClearGate, by long-pressing ClearGate's icon, or from a shortcut on your home screen. ClearGate pauses and the bank opens in one tap.
+- **Resume reminders:** while paused, a notification shows **ClearGate is paused · Resume**, and nudges you once if you're still paused after about 10 minutes.
+- **Quick Settings tile and home-screen widget:** pause or resume from the notification shade or your home screen.
 
-The app's status card has the same **Pause for banking** and **Resume** buttons. While paused, MyGate's ads show as usual.
+**Resuming:** tap **Resume** (notification, tile, widget or app). Accessibility settings opens: tap **ClearGate** (on some phones it's under *Installed apps* or *Downloaded apps*), turn it on and tap **Allow**. ClearGate then takes you back to your home screen. Android only lets *you* switch accessibility on, which is why this step can't be a single tap.
+
+While paused, MyGate's ads show as usual.
 </details>
 
 <details>

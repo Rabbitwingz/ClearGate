@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
 
 import java.util.ArrayDeque;
 import java.util.Locale;
@@ -31,6 +32,10 @@ public class AdSkipService extends AccessibilityService {
     /** If MyGate is somehow still showing the result screen after Home, press Back at these times. */
     private static final long[] FALLBACK_DELAYS_MS = {800, 2_000, 3_500};
     private static final int MAX_NODES = 600;
+    /** How long after tapping Resume we still take the user out of Settings once they switch ClearGate on. */
+    private static final long RESUME_WINDOW_MS = 5 * 60_000;
+    /** Lets Android's "Allow" dialog close before pressing Home. */
+    private static final long LEAVE_SETTINGS_DELAY_MS = 700;
 
     /** Button labels on the gate request screen ("Approve Entry", "Deny Entry", ...). */
     private static final String[] ANSWER_WORDS = {
@@ -62,16 +67,25 @@ public class AdSkipService extends AccessibilityService {
         super.onServiceConnected();
         instance = this;
         Store.dropLegacyData(this);
-        // Switched back on (from Settings or the tile): no longer paused.
-        Store.setPaused(this, false);
-        PauseControl.INSTANCE.refreshTile(this);
+        // Switched back on: no longer paused, so clear the paused notification and nudge.
+        PauseControl.INSTANCE.onResumed(this);
+        // If the user came here via a Resume button, take them out of Settings (they're a few screens deep) and
+        // confirm. Only right after a resume request, so a reboot or update never sends anyone Home.
+        long requested = Store.resumeRequestedAt(this);
+        if (requested > 0 && System.currentTimeMillis() - requested < RESUME_WINDOW_MS) {
+            Store.setResumeRequestedAt(this, 0);
+            handler.postDelayed(() -> {
+                performGlobalAction(GLOBAL_ACTION_HOME);
+                Toast.makeText(this, "ClearGate is back on", Toast.LENGTH_SHORT).show();
+            }, LEAVE_SETTINGS_DELAY_MS);
+        }
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         instance = null;
         handler.removeCallbacksAndMessages(null);
-        PauseControl.INSTANCE.refreshTile(this);
+        PauseControl.INSTANCE.refreshAll(this, false);
         return super.onUnbind(intent);
     }
 

@@ -3,9 +3,16 @@
 
     <!-- Lets the setup screen ask to run unrestricted in the background. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- The "paused · Resume" notification and the 10-minute nudge. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
         <package android:name="com.mygate.user" />
+        <!-- Lists apps with a launcher icon, to pick banking apps for "Pause & open" shortcuts. -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
 
     <application
@@ -35,6 +42,39 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_config" />
         </service>
+
+        <!-- Invisible steps: resume (remembers the request, opens Settings) and "Pause & open <bank>". -->
+        <activity
+            android:name=".ResumeActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name=".BankLaunchActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- Nudge alarm and the widget's Pause button. Not exported: only ClearGate can send these. -->
+        <receiver
+            android:name=".ActionReceiver"
+            android:exported="false" />
+
+        <!-- Home-screen widget. -->
+        <receiver
+            android:name=".ClearGateWidget"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
 
         <!-- Quick Settings tile: pause ClearGate for banking apps, tap again to resume. -->
         <service
