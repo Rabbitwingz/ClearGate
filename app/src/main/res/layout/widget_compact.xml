@@ -45,7 +45,8 @@
         android:padding="8dp"
         android:src="@drawable/ic_widget_add" />
 
-    <View
+    <!-- Spacer pushing the button to the end. Widgets can't use a plain View, so it's an empty FrameLayout. -->
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_weight="1" />
