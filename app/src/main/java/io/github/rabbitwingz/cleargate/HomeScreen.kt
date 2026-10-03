@@ -187,11 +187,11 @@ private fun BankingTipPill(onClick: () -> Unit) {
             Icon(Icons.Rounded.AccountBalance, null, tint = colors.primary, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(12.dp))
             Text(
-                "Banking app won't open? Set up quick access",
+                "Banking apps won't open? Fix it",
                 style = MaterialTheme.typography.labelLarge,
                 color = colors.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                // Fits one line; wraps rather than truncating with large font settings.
+                maxLines = 2,
                 modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(8.dp))
