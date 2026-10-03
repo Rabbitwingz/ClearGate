@@ -43,12 +43,15 @@ public class AdSkipService extends AccessibilityService {
             "accept", "let in", "leave at gate", "wait at gate", "collect at gate", "send in"};
 
     /**
-     * Text on MyGate's post-decision screen, which is where the ad sits
-     * ("Entry approved for <name>", the ad card, "Upgrade to Premium to enjoy ... ad-free experience").
+     * Text on MyGate's post-decision screen, which is where the ad sits. Visitor requests say "Entry approved for
+     * <name>" (plus the ad card and "Upgrade to Premium to enjoy ... ad-free experience"); delivery pre-approvals
+     * from apps like Swiggy/Instamart say "Pre-approved by <you>". Only counts within the watch window after a
+     * request screen, so these phrases can't trigger anywhere else in MyGate.
      */
     private static final String[] RESULT_SCREEN_TEXTS = {
             "entry approved for", "entry denied for", "entry rejected for", "entry declined for",
-            "entry allowed for", "upgrade to premium to enjoy", "ad-free experience"};
+            "entry allowed for", "upgrade to premium to enjoy", "ad-free experience",
+            "approved by", "declined by", "denied by", "rejected by", "entry declined"};
 
     /** The running service, so the pause tile can switch it off (see PauseControl). Null while disabled. */
     private static AdSkipService instance;
