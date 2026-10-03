@@ -6,10 +6,6 @@
 
     <queries>
         <package android:name="com.mygate.user" />
-        <!-- ClearGate's own switch in Accessibility settings, opened to resume after a pause. -->
-        <intent>
-            <action android:name="android.settings.ACCESSIBILITY_DETAILS_SETTINGS" />
-        </intent>
     </queries>
 
     <application

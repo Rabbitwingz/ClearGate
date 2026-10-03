@@ -53,7 +53,7 @@ Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while an
 
 1. Add the **Pause ClearGate** tile to Quick Settings. On Android 13+, use **Add tile** in the app; on older versions, pull down Quick Settings, tap the edit (pencil) button and drag it in.
 2. **Before banking:** tap the tile. ClearGate switches its accessibility off, so the bank app sees nothing.
-3. **After banking:** tap the tile again. It opens ClearGate's switch in Accessibility settings; turn it on and tap **Allow**. Android only lets *you* switch accessibility on, which is why this takes a couple of taps.
+3. **After banking:** tap the tile again. It opens Accessibility settings: tap **ClearGate** (on some phones it's under *Installed apps* or *Downloaded apps*), turn it on and tap **Allow**. Android only lets *you* switch accessibility on, which is why this takes a few taps.
 
 The app's status card has the same **Pause for banking** and **Resume** buttons. While paused, MyGate's ads show as usual.
 </details>

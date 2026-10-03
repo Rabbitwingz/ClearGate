@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
@@ -13,7 +14,7 @@ import androidx.annotation.RequiresApi
 /**
  * Pausing for banking apps. Banks flag any enabled third-party accessibility service, so a pause has to switch
  * ClearGate's accessibility fully off. The service can do that itself (disableSelf), but Android only lets the user
- * switch it back on, so resuming opens ClearGate's switch in Accessibility settings.
+ * switch it back on, so resuming opens Accessibility settings for them to flip ClearGate's switch.
  */
 object PauseControl {
     /** Switches ClearGate's accessibility off. Returns false if the service isn't running (nothing to pause). */
@@ -26,27 +27,28 @@ object PauseControl {
     }
 
     /**
-     * Settings' page for one accessibility service. Not a public SDK constant, but present since Android 11; it only
-     * opens services belonging to the calling app, which is what we want.
+     * Opens Accessibility settings so the user can switch ClearGate back on. (The per-service details page needs a
+     * system-only permission, so ordinary apps get a SecurityException there.) The fragment-args extras ask
+     * Pixel/AOSP Settings to scroll to and highlight ClearGate's entry; other Settings apps ignore them.
      */
-    private const val ACTION_ACCESSIBILITY_DETAILS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS"
-
-    /** Opens the screen where the user switches ClearGate back on: its own switch where available, else the list. */
     fun resumeIntent(context: Context): Intent {
-        if (Build.VERSION.SDK_INT >= 30) {
-            val details = Intent(ACTION_ACCESSIBILITY_DETAILS)
-                .putExtra(
-                    Intent.EXTRA_COMPONENT_NAME,
-                    ComponentName(context, AdSkipService::class.java).flattenToString(),
-                )
-            if (details.resolveActivity(context.packageManager) != null) {
-                return details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        }
-        return Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val key = ComponentName(context, AdSkipService::class.java).flattenToString()
+        return Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            .putExtra(EXTRA_FRAGMENT_ARG_KEY, key)
+            .putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, Bundle().apply { putString(EXTRA_FRAGMENT_ARG_KEY, key) })
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
-    fun resume(context: Context) = context.startActivity(resumeIntent(context))
+    /** Opens the resume screen. Returns false (instead of crashing) if Settings refuses or is missing. */
+    fun resume(context: Context): Boolean = try {
+        context.startActivity(resumeIntent(context))
+        true
+    } catch (_: RuntimeException) { // ActivityNotFoundException, SecurityException
+        false
+    }
+
+    private const val EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key"
+    private const val EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args"
 
     /** Android 13+ can add the tile to Quick Settings with a system prompt; older versions need the shade's edit mode. */
     val canPromptToAddTile: Boolean get() = Build.VERSION.SDK_INT >= 33
