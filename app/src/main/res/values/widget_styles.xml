@@ -1,26 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Label under a bank icon in the 4x2 widget. -->
+    <!--
+      4x2 widget bank row: fixed 60dp slots with a 40dp icon centred (10dp inset, matching the header's inset), and
+      either a flexible spacer or a fixed gap between slots. Slots, gaps and spacers start hidden; ClearGateWidget
+      shows the ones it needs.
+    -->
+    <style name="WidgetBankSlot">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="WidgetBankIcon">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <!-- Label under a bank icon: fills the 60dp slot, centred, cut off with "…" if too long. -->
     <style name="WidgetBankLabel">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_horizontal</item>
         <item name="android:maxLines">1</item>
         <item name="android:textColor">@color/widget_on_surface_variant</item>
         <item name="android:textSize">11sp</item>
     </style>
 
-    <!-- A bank slot in the widget picker preview (widget_preview.xml). -->
-    <style name="WidgetPreviewSlot">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center_horizontal</item>
-        <item name="android:orientation">vertical</item>
+    <!-- Fixed gap between slots (1-2 items, left-aligned). -->
+    <style name="WidgetBankGap">
+        <item name="android:layout_width">8dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:visibility">gone</item>
     </style>
 
-    <!-- Sample bank icon in the preview: a bank building on an accent tile. -->
+    <!-- Flexible spacer between slots (3+ items, spread to both edges). -->
+    <style name="WidgetBankFlex">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- Sample bank icon in the picker preview: a bank building on an accent tile. -->
     <style name="WidgetPreviewBank">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>

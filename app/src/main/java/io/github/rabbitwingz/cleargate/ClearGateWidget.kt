@@ -26,6 +26,8 @@ class ClearGateWidget : AppWidgetProvider() {
         private val BANK_ICONS = intArrayOf(R.id.bank_icon_0, R.id.bank_icon_1, R.id.bank_icon_2, R.id.bank_icon_3)
         private val BANK_LABELS = intArrayOf(R.id.bank_label_0, R.id.bank_label_1, R.id.bank_label_2, R.id.bank_label_3)
         private val BANK_SLOTS = intArrayOf(R.id.bank_slot_0, R.id.bank_slot_1, R.id.bank_slot_2, R.id.bank_slot_3)
+        private val BANK_GAPS = intArrayOf(R.id.bank_gap_0, R.id.bank_gap_1, R.id.bank_gap_2, R.id.bank_gap_3)
+        private val BANK_FLEXES = intArrayOf(R.id.bank_flex_0, R.id.bank_flex_1, R.id.bank_flex_2, R.id.bank_flex_3)
 
         /** Redraws all ClearGate widgets. {@code pausing}: show "Paused" before Settings catches up. */
         fun refresh(context: Context, pausing: Boolean = false) {
@@ -100,9 +102,25 @@ class ClearGateWidget : AppWidgetProvider() {
                     ),
                 )
             }
-            views.setViewVisibility(R.id.bank_add, if (state.banks.size < BankShortcuts.MAX_BANKS) View.VISIBLE else View.GONE)
+            val showAdd = state.banks.size < BankShortcuts.MAX_BANKS
+            views.setViewVisibility(R.id.bank_add, if (showAdd) View.VISIBLE else View.GONE)
+            if (!compact) spaceBankRow(views, state.banks.size, showAdd)
             views.setOnClickPendingIntent(R.id.bank_add, openApp(context, banking = true))
             return views
+        }
+
+        /**
+         * Spacing between the 4x2 widget's bank slots: with 3+ items they spread from under the logo to under the
+         * button's right edge (flexible spacers); with 1-2 they sit left-aligned with a fixed gap, rather than being
+         * pushed to opposite corners. Each separator follows a visible bank that has another item after it.
+         */
+        private fun spaceBankRow(views: RemoteViews, banks: Int, showAdd: Boolean) {
+            val spread = banks + (if (showAdd) 1 else 0) >= 3
+            for (i in BANK_GAPS.indices) {
+                val needed = i < banks && (i < banks - 1 || showAdd)
+                views.setViewVisibility(BANK_FLEXES[i], if (needed && spread) View.VISIBLE else View.GONE)
+                views.setViewVisibility(BANK_GAPS[i], if (needed && !spread) View.VISIBLE else View.GONE)
+            }
         }
 
         /** Pausing works from a broadcast; resuming has to open Settings, so it goes straight to an activity. */
