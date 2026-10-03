@@ -11,6 +11,25 @@
         <item name="android:textSize">11sp</item>
     </style>
 
+    <!-- A bank slot in the widget picker preview (widget_preview.xml). -->
+    <style name="WidgetPreviewSlot">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- Sample bank icon in the preview: a bank building on an accent tile. -->
+    <style name="WidgetPreviewBank">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/widget_preview_bank_bg</item>
+        <item name="android:padding">9dp</item>
+        <item name="android:src">@drawable/ic_widget_preview_bank</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
     <!-- Bank icon in the compact 4x1 widget. -->
     <style name="WidgetCompactBank">
         <item name="android:layout_width">34dp</item>

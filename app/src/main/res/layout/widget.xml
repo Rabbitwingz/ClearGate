@@ -44,6 +44,7 @@
                 android:id="@+id/widget_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/widget_status_on"
                 android:textColor="@color/widget_on_surface_variant"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -52,6 +53,7 @@
             android:id="@+id/widget_button"
             android:layout_width="wrap_content"
             android:layout_height="34dp"
+            android:text="@string/widget_pause"
             android:background="@drawable/widget_button"
             android:gravity="center"
             android:paddingStart="14dp"
@@ -72,6 +74,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:visibility="gone"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -91,6 +94,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:visibility="gone"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -110,6 +114,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:visibility="gone"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -129,6 +134,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:visibility="gone"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
