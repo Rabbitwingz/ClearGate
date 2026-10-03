@@ -280,6 +280,9 @@ private fun SetupPage(status: SetupStatus) {
             Spacer(Modifier.height(16.dp))
             RestrictedSettingsHint(onOpen = { SystemScreens.appInfo(context) })
         }
+        Spacer(Modifier.height(16.dp))
+        BankingTileCard()
+        Spacer(Modifier.height(16.dp))
     }
 }
 

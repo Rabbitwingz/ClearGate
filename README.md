@@ -33,7 +33,7 @@ It never touches the approve/deny screen itself, and it waits for MyGate's confi
 - **Only sees MyGate.** It uses Android's accessibility feature, restricted to the `com.mygate.user` package. Other apps are invisible to it.
 - **No internet permission.** It can't send anything anywhere. The activity log stays on your phone.
 - **Open source.** Everything it does is in [`AdSkipService.java`](app/src/main/java/io/github/rabbitwingz/cleargate/AdSkipService.java).
-- **One switch** pauses it at any time.
+- **Pause any time** from the app or the **Pause ClearGate** Quick Settings tile. Pausing switches its accessibility fully off.
 
 ## Install
 
@@ -45,6 +45,18 @@ It never touches the approve/deny screen itself, and it waits for MyGate's confi
 Updates use the same link and install over the previous version.
 
 ## Troubleshooting
+
+<details>
+<summary><b>My banking app says "Unauthorized app" or "Accessibility permission detected"</b></summary>
+
+Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank:
+
+1. Add the **Pause ClearGate** tile to Quick Settings. On Android 13+, use **Add tile** in the app; on older versions, pull down Quick Settings, tap the edit (pencil) button and drag it in.
+2. **Before banking:** tap the tile. ClearGate switches its accessibility off, so the bank app sees nothing.
+3. **After banking:** tap the tile again. It opens ClearGate's switch in Accessibility settings; turn it on and tap **Allow**. Android only lets *you* switch accessibility on, which is why this takes a couple of taps.
+
+The app's status card has the same **Pause for banking** and **Resume** buttons. While paused, MyGate's ads show as usual.
+</details>
 
 <details>
 <summary><b>The accessibility switch is greyed out ("Restricted setting")</b></summary>

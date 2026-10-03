@@ -10,7 +10,8 @@ import org.json.JSONObject;
 /** Settings, stats and a short activity log, all in SharedPreferences. */
 final class Store {
     private static final String PREFS = "cleargate";
-    private static final String KEY_ENABLED = "enabled";
+    private static final String KEY_PAUSED = "paused_for_banking";
+    private static final String KEY_TILE_ADDED = "tile_added";
     private static final String KEY_LOG = "activity_log";
     private static final String KEY_SKIPPED = "skipped_count";
     private static final String KEY_LAST_SKIPPED = "last_skipped_at";
@@ -29,17 +30,30 @@ final class Store {
         return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    /** Removes data older versions kept (per-screen log with on-screen text, the screen block list). */
+    /**
+     * Removes data older versions kept: the per-screen log with on-screen text, the screen block list, and the old
+     * in-app on/off switch (replaced by pausing for banking, which switches accessibility off).
+     */
     static void dropLegacyData(Context c) {
-        prefs(c).edit().remove("screen_log").remove("blocked_classes").apply();
+        prefs(c).edit().remove("screen_log").remove("blocked_classes").remove("enabled").apply();
     }
 
-    static boolean isEnabled(Context c) {
-        return prefs(c).getBoolean(KEY_ENABLED, true);
+    /** True after the user paused ClearGate for banking, until accessibility is switched back on. */
+    static boolean isPaused(Context c) {
+        return prefs(c).getBoolean(KEY_PAUSED, false);
     }
 
-    static void setEnabled(Context c, boolean on) {
-        prefs(c).edit().putBoolean(KEY_ENABLED, on).apply();
+    static void setPaused(Context c, boolean paused) {
+        prefs(c).edit().putBoolean(KEY_PAUSED, paused).apply();
+    }
+
+    /** Whether the pause tile is in Quick Settings, as far as we know (only Android 13+'s add prompt reports it). */
+    static boolean isTileAdded(Context c) {
+        return prefs(c).getBoolean(KEY_TILE_ADDED, false);
+    }
+
+    static void setTileAdded(Context c, boolean added) {
+        prefs(c).edit().putBoolean(KEY_TILE_ADDED, added).apply();
     }
 
     static int skippedCount(Context c) {

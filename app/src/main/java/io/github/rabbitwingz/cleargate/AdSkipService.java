@@ -1,6 +1,7 @@
 package io.github.rabbitwingz.cleargate;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -44,21 +45,39 @@ public class AdSkipService extends AccessibilityService {
             "entry approved for", "entry denied for", "entry rejected for", "entry declined for",
             "entry allowed for", "upgrade to premium to enjoy", "ad-free experience"};
 
+    /** The running service, so the pause tile can switch it off (see PauseControl). Null while disabled. */
+    private static AdSkipService instance;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long armedUntil;
     private long lastDismissAt;
     private long lastContentCheck;
 
+    static AdSkipService running() {
+        return instance;
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        instance = this;
         Store.dropLegacyData(this);
+        // Switched back on (from Settings or the tile): no longer paused.
+        Store.setPaused(this, false);
+        PauseControl.INSTANCE.refreshTile(this);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        instance = null;
+        handler.removeCallbacksAndMessages(null);
+        PauseControl.INSTANCE.refreshTile(this);
+        return super.onUnbind(intent);
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getPackageName() == null || !TARGET_PACKAGE.contentEquals(event.getPackageName())) return;
-        if (!Store.isEnabled(this)) return;
 
         long now = SystemClock.uptimeMillis();
         switch (event.getEventType()) {
@@ -184,6 +203,7 @@ public class AdSkipService extends AccessibilityService {
 
     @Override
     public void onDestroy() {
+        instance = null;
         handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
