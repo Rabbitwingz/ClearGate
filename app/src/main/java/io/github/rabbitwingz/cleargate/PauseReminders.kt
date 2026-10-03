@@ -46,6 +46,7 @@ object PauseReminders {
     }
 
     private fun post(context: Context, nudge: Boolean) {
+        if (!Store.remindersEnabled(context)) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         if (Build.VERSION.SDK_INT >= 33 &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED

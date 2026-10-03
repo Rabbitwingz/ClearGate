@@ -17,6 +17,7 @@ final class Store {
     private static final String KEY_TILE_ADDED = "tile_added";
     private static final String KEY_RESUME_REQUESTED = "resume_requested_at";
     private static final String KEY_BANKS = "bank_packages";
+    private static final String KEY_REMINDERS = "resume_reminders";
     private static final String KEY_LOG = "activity_log";
     private static final String KEY_SKIPPED = "skipped_count";
     private static final String KEY_LAST_SKIPPED = "last_skipped_at";
@@ -62,6 +63,15 @@ final class Store {
 
     static void setResumeRequestedAt(Context c, long millis) {
         prefs(c).edit().putLong(KEY_RESUME_REQUESTED, millis).apply();
+    }
+
+    /** Whether to show the "paused · Resume" notification and the 10-minute nudge (Settings › Resume reminders). */
+    static boolean remindersEnabled(Context c) {
+        return prefs(c).getBoolean(KEY_REMINDERS, true);
+    }
+
+    static void setRemindersEnabled(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_REMINDERS, enabled).apply();
     }
 
     /** Package names of the banking apps the user picked for "Pause & open" shortcuts. */

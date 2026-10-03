@@ -31,7 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.RoundedPolygon
@@ -47,6 +51,8 @@ fun ShapeBadge(
     size: Dp,
     iconSize: Dp = size * 0.45f,
     spin: Boolean = false,
+    /** False for multi-colour icons (like clearGateMark) that carry their own colours. */
+    tintIcon: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val shape = polygon.toShape()
@@ -65,8 +71,44 @@ fun ShapeBadge(
                 .clip(shape)
                 .background(container)
         )
-        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(iconSize))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = if (tintIcon) content else Color.Unspecified,
+            modifier = Modifier.size(iconSize),
+        )
     }
+}
+
+/**
+ * ClearGate's mark (the launcher icon's gate arch and chevrons) as a two-tone vector, so it can follow the theme.
+ * Same paths as res/drawable/ic_tile.xml.
+ */
+@Composable
+fun clearGateMark(arch: Color, chevrons: Color): ImageVector = remember(arch, chevrons) {
+    ImageVector.Builder(
+        name = "ClearGateMark",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 58f,
+        viewportHeight = 58f,
+    ).apply {
+        addGroup(translationX = -25f, translationY = -26f)
+        addPath(
+            pathData = addPathNodes("M35,77 L35,52 A19,19 0 0 1 73,52 L73,77"),
+            stroke = SolidColor(arch),
+            strokeLineWidth = 7f,
+            strokeLineCap = StrokeCap.Round,
+        )
+        addPath(
+            pathData = addPathNodes("M45,54 L53,62 L45,70 M55,54 L63,62 L55,70"),
+            stroke = SolidColor(chevrons),
+            strokeLineWidth = 6.5f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+        clearGroup()
+    }.build()
 }
 
 /** One step of the setup checklist: what it is, whether it's done, and a button to fix it. */

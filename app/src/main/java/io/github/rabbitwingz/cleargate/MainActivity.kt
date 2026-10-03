@@ -32,11 +32,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private enum class Screen { Onboarding, Home, Settings }
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun GateApp() {
     val context = LocalContext.current
     var onboarded by rememberSaveable { mutableStateOf(Store.isOnboarded(context)) }
+    var inSettings by rememberSaveable { mutableStateOf(false) }
 
     // Re-read system state whenever we come back (e.g. from Accessibility settings).
     var status by remember { mutableStateOf(SetupStatus.read(context)) }
@@ -62,18 +65,34 @@ private fun GateApp() {
     // Theme values must be read here; transitionSpec isn't a composable context.
     val enterSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val exitSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val screen = when {
+        !onboarded -> Screen.Onboarding
+        inSettings -> Screen.Settings
+        else -> Screen.Home
+    }
     AnimatedContent(
-        targetState = onboarded,
+        targetState = screen,
         transitionSpec = { fadeIn(enterSpec) togetherWith fadeOut(exitSpec) },
-        label = "onboarding",
-    ) { done ->
-        if (!done) {
-            OnboardingScreen(status = status, onFinish = {
+        label = "screen",
+    ) { target ->
+        when (target) {
+            Screen.Onboarding -> OnboardingScreen(status = status, onFinish = {
                 Store.setOnboarded(context, true)
                 onboarded = true
             })
-        } else {
-            HomeScreen(status = status, prefsVersion = prefsVersion, onReplayIntro = { onboarded = false })
+            Screen.Home -> HomeScreen(
+                status = status,
+                prefsVersion = prefsVersion,
+                onOpenSettings = { inSettings = true },
+            )
+            Screen.Settings -> SettingsScreen(
+                status = status,
+                onBack = { inSettings = false },
+                onReplayIntro = {
+                    inSettings = false
+                    onboarded = false
+                },
+            )
         }
     }
 }

@@ -28,12 +28,7 @@ import androidx.compose.material.icons.rounded.Accessibility
 import androidx.compose.material.icons.rounded.BatterySaver
 import androidx.compose.material.icons.rounded.DoorFront
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.PrivacyTip
-import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.TouchApp
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -54,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-private const val PAGE_COUNT = 4
+private const val PAGE_COUNT = 3
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -76,14 +71,17 @@ fun OnboardingScreen(status: SetupStatus, onFinish: () -> Unit) {
             HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { page ->
                 when (page) {
                     0 -> IntroPage(
-                        icon = Icons.Rounded.Shield,
+                        icon = clearGateMark(
+                            arch = MaterialTheme.colorScheme.onPrimaryContainer,
+                            chevrons = MaterialTheme.colorScheme.primary,
+                        ),
+                        tintIcon = false,
                         shape = MaterialShapes.Cookie9Sided,
                         title = "Answer the gate.\nSkip the ad.",
                         body = "Every time you approve or deny a visitor, MyGate shows a full-screen ad. " +
                             "ClearGate gets it out of your way automatically.",
                     )
                     1 -> HowItWorksPage()
-                    2 -> PrivacyPage()
                     else -> SetupPage(status)
                 }
             }
@@ -124,7 +122,7 @@ private fun IntroPage(
     shape: androidx.graphics.shapes.RoundedPolygon,
     title: String,
     body: String,
-    extra: @Composable (() -> Unit)? = null,
+    tintIcon: Boolean = true,
 ) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 28.dp),
@@ -138,8 +136,9 @@ private fun IntroPage(
             container = MaterialTheme.colorScheme.primaryContainer,
             content = MaterialTheme.colorScheme.onPrimaryContainer,
             size = 200.dp,
-            iconSize = 84.dp,
+            iconSize = 96.dp,
             spin = true,
+            tintIcon = tintIcon,
         )
         Spacer(Modifier.height(40.dp))
         Text(
@@ -155,10 +154,6 @@ private fun IntroPage(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        if (extra != null) {
-            Spacer(Modifier.height(28.dp))
-            extra()
-        }
         Spacer(Modifier.height(16.dp))
     }
 }
@@ -227,35 +222,6 @@ private fun Step(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun PrivacyPage() {
-    IntroPage(
-        icon = Icons.Rounded.PrivacyTip,
-        shape = MaterialShapes.Clover8Leaf,
-        title = "Private by design",
-        body = "ClearGate uses Android's accessibility feature to see when MyGate shows the ad and to " +
-            "press Home. That's all it does with it.",
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Fact(Icons.Rounded.Lock, "Only sees the MyGate app. Every other app is invisible to it.")
-            Fact(Icons.Rounded.WifiOff, "No internet permission. Nothing ever leaves your phone.")
-            Fact(Icons.Rounded.Tune, "Pause it any time with one switch.")
-        }
-    }
-}
-
-@Composable
-private fun Fact(icon: ImageVector, text: String) {
-    Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(14.dp))
-            Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
 private fun SetupPage(status: SetupStatus) {
     val context = LocalContext.current
     Column(
@@ -263,14 +229,14 @@ private fun SetupPage(status: SetupStatus) {
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            "Two quick settings",
+            "Almost done",
             style = MaterialTheme.typography.displaySmallEmphasized,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(start = 4.dp),
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Turn these on and you're done. You can come back to them any time.",
+            "Turn these on and you're set. You can change them any time in Settings.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 4.dp, bottom = 24.dp),
@@ -280,8 +246,20 @@ private fun SetupPage(status: SetupStatus) {
             Spacer(Modifier.height(16.dp))
             RestrictedSettingsHint(onOpen = { SystemScreens.appInfo(context) })
         }
-        Spacer(Modifier.height(16.dp))
-        BankingSection(status)
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "For banking apps",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+        )
+        Text(
+            "Some banking apps won't open while ClearGate is on. These make pausing it quick.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
+        )
+        PauseSetupSteps(status)
         Spacer(Modifier.height(16.dp))
     }
 }

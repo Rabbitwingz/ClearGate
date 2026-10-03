@@ -17,20 +17,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.GppGood
 import androidx.compose.material.icons.rounded.GppMaybe
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.AccountBalance
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.PauseCircle
 import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -43,13 +40,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -79,7 +73,7 @@ private enum class Mode { On, Paused, NotSetUp }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit) {
+fun HomeScreen(status: SetupStatus, prefsVersion: Int, onOpenSettings: () -> Unit) {
     val context = LocalContext.current
     // prefsVersion changes whenever the service writes, so these re-read live.
     val paused = remember(prefsVersion) { Store.isPaused(context) }
@@ -87,8 +81,6 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
     val lastSkipped = remember(prefsVersion) { Store.lastSkippedAt(context) }
     val log = remember(prefsVersion) { readLog(context) }
 
-    var menuOpen by remember { mutableStateOf(false) }
-    var confirmClear by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val mode = when {
@@ -109,25 +101,8 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
                 title = { Text("ClearGate") },
                 subtitle = { Text(headline) },
                 actions = {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(Icons.Rounded.MoreVert, contentDescription = "More options")
-                    }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text("How it works") },
-                            leadingIcon = { Icon(Icons.Rounded.Info, null) },
-                            onClick = { menuOpen = false; onReplayIntro() },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Clear activity") },
-                            leadingIcon = { Icon(Icons.Rounded.DeleteSweep, null) },
-                            onClick = { menuOpen = false; confirmClear = true },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Source code") },
-                            leadingIcon = { Icon(Icons.Rounded.Code, null) },
-                            onClick = { menuOpen = false; SystemScreens.web(context, REPO_URL) },
-                        )
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Rounded.Settings, contentDescription = "Settings")
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -151,11 +126,11 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
                     onSetUp = { SystemScreens.accessibility(context) },
                 )
             }
+            if (mode == Mode.On) {
+                item(key = "bankingPill") { BankingPill(onClick = onOpenSettings) }
+            }
             item(key = "stats") { StatsRow(skipped = skipped, lastSkipped = lastSkipped) }
 
-            if (mode != Mode.NotSetUp) {
-                item(key = "banking") { BankingSection(status) }
-            }
             if (mode == Mode.NotSetUp || !status.batteryUnrestricted) {
                 item(key = "setupHeader") { SectionHeader("Finish setup") }
                 item(key = "setup") { SetupSteps(status) }
@@ -178,15 +153,29 @@ fun HomeScreen(status: SetupStatus, prefsVersion: Int, onReplayIntro: () -> Unit
         }
     }
 
-    if (confirmClear) {
-        AlertDialog(
-            onDismissRequest = { confirmClear = false },
-            icon = { Icon(Icons.Rounded.DeleteSweep, null) },
-            title = { Text("Clear activity?") },
-            text = { Text("This removes the activity list. Your ads-skipped count stays.") },
-            confirmButton = { TextButton(onClick = { Store.clearLog(context); confirmClear = false }) { Text("Clear") } },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Cancel") } },
-        )
+}
+
+/** Points people whose banking app refuses to open (because ClearGate is on) to Settings › Banking apps. */
+@Composable
+private fun BankingPill(onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = colors.secondaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.AccountBalance, null, tint = colors.onSecondaryContainer)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                "Banking app won't open? Pause ClearGate",
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.onSecondaryContainer,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = colors.onSecondaryContainer)
+        }
     }
 }
 

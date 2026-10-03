@@ -49,11 +49,11 @@ Updates use the same link and install over the previous version.
 <details>
 <summary><b>My banking app says "Unauthorized app" or "Accessibility permission detected"</b></summary>
 
-Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank. The **Banking apps** card in ClearGate sets this up:
+Many banking apps (Axis Mobile, ICICI iMobile and others) refuse to run while any accessibility app installed outside the Play Store is switched on. It's an anti-fraud check, and ClearGate can't and won't hide from it. Instead, pause ClearGate while you bank. Open ClearGate, tap the **Banking app won't open?** pill (or the ⚙ Settings icon), and set up:
 
 - **Pause & open:** add your banking apps once. Then open them with **Pause & open** in ClearGate, by long-pressing ClearGate's icon, or from a shortcut on your home screen. ClearGate pauses and the bank opens in one tap.
-- **Resume reminders:** while paused, a notification shows **ClearGate is paused · Resume**, and nudges you once if you're still paused after about 10 minutes.
-- **Quick Settings tile and home-screen widget:** pause or resume from the notification shade or your home screen.
+- **Resume reminders** (Settings › Pausing): while paused, a notification shows **ClearGate is paused · Resume**, and nudges you once if you're still paused after about 10 minutes.
+- **Quick Settings tile and home-screen widget** (Settings › Pausing): pause or resume from the notification shade or your home screen.
 
 **Resuming:** tap **Resume** (notification, tile, widget or app). Accessibility settings opens: tap **ClearGate** (on some phones it's under *Installed apps* or *Downloaded apps*), turn it on and tap **Allow**. ClearGate then takes you back to your home screen. Android only lets *you* switch accessibility on, which is why this step can't be a single tap.
 
